@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="talk_files/libs/clipboard/clipboard.min.js"></script>
+<script src="talk_files/libs/quarto-html/tabby.min.js"></script>
+<script src="talk_files/libs/quarto-html/popper.min.js"></script>
+<script src="talk_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="talk_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="talk_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="talk_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.37">
+
+  <title>Matrix Decomposition Package for Metabolomics</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-b556fbb32ef0e06571c0a75ce8a6916f.css">
+  <link rel="stylesheet" href="styles.css">
+  <link href="talk_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="talk_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="talk_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="talk_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="talk_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="talk_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <script type="module" src="talk_files/libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+  <link href="talk_files/libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+
+<section id="section" class="slide level2 titlepage" data-background-image="assets/uthsc-building-faded.png" data-background-size="cover" data-background-position="center" data-background-color="#ffffff">
+<h2></h2>
+<div class="titlepage-slide">
+<div class="titlepage-content">
+<p><img class="tp-logo" src="assets/uthsc-logo-centered.png" alt="University of Tennessee Health Sciences"></p>
+<p class="tp-title">
+Julia Package for Large Matrix Decomposition in Metabolomics: BigRiverEssence <svg viewbox="0 0 24 24" width="0.85em" height="0.95em" style="vertical-align:-0.08em;fill:#E78824;" aria-hidden="true"> <path d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm0 12c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3z"></path> </svg>
+</p>
+<p class="tp-author">
+Abhisek Banerjee
+</p>
+<p class="tp-institute">
+UT Health Science Center — Preventive Medicine / Biostatistics
+</p>
+</div>
+</div>
+</section>
+<section id="methods-what" class="title-slide slide level1 center">
+<h1>The 9 methods, in one line each</h1>
+<p>What each one does, and why it earns a place in the toolbox. Click a method:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="94" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 93;"><span id="cb1-94"><a href=""></a>methodInfo <span class="op">=</span> [</span>
+<span id="cb1-95"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"PCA"</span><span class="op">,</span></span>
+<span id="cb1-96"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"Takes one data matrix and finds the few directions along which the samples vary the most, then rewrites each sample with coordinates along those directions instead of the original variables."</span><span class="op">,</span></span>
+<span id="cb1-97"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"The workhorse for dimension reduction and visualization — and the building block the others extend."</span>}<span class="op">,</span></span>
+<span id="cb1-98"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"PLSKERN"</span><span class="op">,</span></span>
+<span id="cb1-99"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"Given predictors X and a response Y on the same samples, it builds components of X that vary together with Y (maximizing their covariance) — supervised, unlike PCA. The 'kernel' part is just a faster route to the same fit via cross-product matrices."</span><span class="op">,</span></span>
+<span id="cb1-100"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Handles many correlated variables (p ≫ n) where ordinary regression fails; the kernel form is a fast route to the same PLS fit."</span>}<span class="op">,</span></span>
+<span id="cb1-101"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"CCA"</span><span class="op">,</span></span>
+<span id="cb1-102"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"Takes two data blocks X and Y measured on the same samples and finds the weighted combination of each whose resulting scores are as correlated as possible — i.e. the strongest shared pattern between the two blocks."</span><span class="op">,</span></span>
+<span id="cb1-103"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Quantifies how two sets of measurements on the same samples relate — the classic two-block tool."</span>}<span class="op">,</span></span>
+<span id="cb1-104"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"PMD"</span><span class="op">,</span></span>
+<span id="cb1-105"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"Approximates a matrix as a sum of rank-1 pieces (score × loading), but with penalties that push most loading weights to exactly zero — a low-rank factorization that is also sparse."</span><span class="op">,</span></span>
+<span id="cb1-106"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"The engine behind sparse PCA/CCA — gives interpretable factors by zeroing out most loadings."</span>}<span class="op">,</span></span>
+<span id="cb1-107"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"SPC"</span><span class="op">,</span></span>
+<span id="cb1-108"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"PCA with a sparsity penalty: each principal component is still a direction of high variance, but it's allowed to use only a small subset of variables (the rest get weight zero)."</span><span class="op">,</span></span>
+<span id="cb1-109"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Keeps PCA's structure but yields loadings you can actually read — a named short list per component."</span>}<span class="op">,</span></span>
+<span id="cb1-110"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"SCCA"</span><span class="op">,</span></span>
+<span id="cb1-111"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"CCA with sparsity: it finds the correlated directions between two blocks X and Z, but forces each direction to rely on only a few variables per block instead of all of them."</span><span class="op">,</span></span>
+<span id="cb1-112"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Finds which specific variables in each block drive the association — feasible even when p ≫ n."</span>}<span class="op">,</span></span>
+<span id="cb1-113"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"JIVE"</span><span class="op">,</span></span>
+<span id="cb1-114"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"Takes several data types measured on the same samples and decomposes each into three parts: a joint structure shared across all types, individual structure unique to that type, and residual noise."</span><span class="op">,</span></span>
+<span id="cb1-115"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Separates signal common to all sources from what's unique to each — what plain PCA/CCA can't do."</span>}<span class="op">,</span></span>
+<span id="cb1-116"><a href=""></a>   {<span class="dt">name</span><span class="op">:</span><span class="st">"PLS-DA"</span><span class="op">,</span></span>
+<span id="cb1-117"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"PLS turned into a classifier: the response is the class label (one-hot encoded), so it finds the directions of X that best separate the known groups. Uses all variables — the dense counterpart of sPLS-DA."</span><span class="op">,</span></span>
+<span id="cb1-118"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Supervised group separation and prediction when variables are many and correlated (p ≫ n)."</span>}<span class="op">,</span></span>
+<span id="cb1-119"><a href=""></a>  {<span class="dt">name</span><span class="op">:</span><span class="st">"sPLS-DA"</span><span class="op">,</span></span>
+<span id="cb1-120"><a href=""></a>   <span class="dt">what</span><span class="op">:</span><span class="st">"PLS used for classification: the response is the class label (one-hot encoded), and a sparsity penalty makes each component depend on only a few variables — so it separates the classes and names the variables doing it."</span><span class="op">,</span></span>
+<span id="cb1-121"><a href=""></a>   <span class="dt">why</span><span class="op">:</span><span class="st">"Predicts the class and names the few variables responsible — interpretable biomarker selection."</span>}</span>
+<span id="cb1-122"><a href=""></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="126" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 125;"><span id="cb2-126"><a href=""></a>viewof methodSel <span class="op">=</span> {</span>
+<span id="cb2-127"><a href=""></a>  <span class="kw">const</span> wrap<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb2-128"><a href=""></a>  <span class="kw">const</span> els<span class="op">=</span>methodInfo<span class="op">.</span><span class="fu">map</span>((d<span class="op">,</span>k)<span class="kw">=&gt;</span>{ <span class="kw">const</span> b<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;button&gt;</span><span class="sc">${</span>d<span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">&lt;/button&gt;`</span><span class="op">;</span></span>
+<span id="cb2-129"><a href=""></a>    b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="st">"font:700 13px inherit;padding:6px 13px;border-radius:20px;border:1.5px solid #ddd;background:#fff;color:#555;cursor:pointer"</span><span class="op">;</span></span>
+<span id="cb2-130"><a href=""></a>    b<span class="op">.</span><span class="at">onclick</span><span class="op">=</span>()<span class="kw">=&gt;</span>{wrap<span class="op">.</span><span class="at">value</span><span class="op">=</span>k<span class="op">;</span><span class="fu">render</span>()<span class="op">;</span>wrap<span class="op">.</span><span class="fu">dispatchEvent</span>(<span class="kw">new</span> <span class="bu">CustomEvent</span>(<span class="st">"input"</span>))<span class="op">;</span>}<span class="op">;</span> <span class="cf">return</span> b<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb2-131"><a href=""></a>  els<span class="op">.</span><span class="fu">forEach</span>(e<span class="kw">=&gt;</span>wrap<span class="op">.</span><span class="fu">append</span>(e))<span class="op">;</span></span>
+<span id="cb2-132"><a href=""></a>  <span class="kw">const</span> render<span class="op">=</span>()<span class="kw">=&gt;</span>els<span class="op">.</span><span class="fu">forEach</span>((b<span class="op">,</span>k)<span class="kw">=&gt;</span>{ <span class="kw">const</span> on<span class="op">=</span>k<span class="op">===</span>wrap<span class="op">.</span><span class="at">value</span><span class="op">;</span></span>
+<span id="cb2-133"><a href=""></a>    b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">background</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#E78824"</span><span class="op">:</span><span class="st">"#fff"</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">borderColor</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#E78824"</span><span class="op">:</span><span class="st">"#ddd"</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#fff"</span><span class="op">:</span><span class="st">"#555"</span><span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb2-134"><a href=""></a>  wrap<span class="op">.</span><span class="at">value</span><span class="op">=</span><span class="dv">0</span><span class="op">;</span> <span class="fu">render</span>()<span class="op">;</span> <span class="cf">return</span> wrap<span class="op">;</span></span>
+<span id="cb2-135"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="139" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 138;"><span id="cb3-139"><a href=""></a>methodView <span class="op">=</span> {</span>
+<span id="cb3-140"><a href=""></a>  <span class="kw">const</span> d<span class="op">=</span>methodInfo[methodSel]<span class="op">;</span></span>
+<span id="cb3-141"><a href=""></a>  <span class="kw">const</span> O<span class="op">=</span><span class="st">"#E78824"</span><span class="op">,</span>Od<span class="op">=</span><span class="st">"#C14C23"</span><span class="op">,</span>G<span class="op">=</span><span class="st">"#4D701F"</span><span class="op">,</span>ink<span class="op">=</span><span class="st">"#2a2a2a"</span><span class="op">,</span>mut<span class="op">=</span><span class="st">"#777"</span><span class="op">;</span></span>
+<span id="cb3-142"><a href=""></a>  <span class="kw">const</span> card<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div style="border:2px solid #eee;border-top:5px solid </span><span class="sc">${</span>O<span class="sc">}</span><span class="vs">;border-radius:14px;padding:18px 24px;background:#fff;min-height:180px"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb3-143"><a href=""></a>  card<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="font:800 24px inherit;color:</span><span class="sc">${</span>Od<span class="sc">}</span><span class="vs">;margin-bottom:14px"&gt;</span><span class="sc">${</span>d<span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb3-144"><a href=""></a>  <span class="kw">const</span> block<span class="op">=</span>(label<span class="op">,</span>text<span class="op">,</span>col)<span class="kw">=&gt;</span>{</span>
+<span id="cb3-145"><a href=""></a>    <span class="kw">const</span> b<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div style="margin-bottom:14px"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb3-146"><a href=""></a>    b<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="font:800 12px inherit;letter-spacing:.04em;color:</span><span class="sc">${</span>col<span class="sc">}</span><span class="vs">;margin-bottom:3px"&gt;</span><span class="sc">${</span>label<span class="sc">}</span><span class="vs">&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb3-147"><a href=""></a>    b<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="font:400 17px inherit;line-height:1.45;color:</span><span class="sc">${</span>ink<span class="sc">}</span><span class="vs">"&gt;</span><span class="sc">${</span>text<span class="sc">}</span><span class="vs">&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb3-148"><a href=""></a>    <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb3-149"><a href=""></a>  }<span class="op">;</span></span>
+<span id="cb3-150"><a href=""></a>  card<span class="op">.</span><span class="fu">append</span>(<span class="fu">block</span>(<span class="st">"WHAT IT IS"</span><span class="op">,</span> d<span class="op">.</span><span class="at">what</span><span class="op">,</span> G))<span class="op">;</span></span>
+<span id="cb3-151"><a href=""></a>  card<span class="op">.</span><span class="fu">append</span>(<span class="fu">block</span>(<span class="st">"WHY IT MATTERS"</span><span class="op">,</span> d<span class="op">.</span><span class="at">why</span><span class="op">,</span> O))<span class="op">;</span></span>
+<span id="cb3-152"><a href=""></a>  <span class="cf">return</span> card<span class="op">;</span></span>
+<span id="cb3-153"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</section>
+
+<section id="methods-diff" class="title-slide slide level1 center">
+<h1>How the 9 methods differ</h1>
+<p>Read a cell as <strong>row vs column</strong>: what the row method has/does that the column one doesn’t.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb4" data-startfrom="163" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 162;"><span id="cb4-163"><a href=""></a>methodsDiff <span class="op">=</span> {</span>
+<span id="cb4-164"><a href=""></a>  <span class="kw">const</span> names <span class="op">=</span> [<span class="st">"PCA"</span><span class="op">,</span><span class="st">"PLSKERN"</span><span class="op">,</span><span class="st">"CCA"</span><span class="op">,</span><span class="st">"PMD"</span><span class="op">,</span><span class="st">"SPC"</span><span class="op">,</span><span class="st">"SCCA"</span><span class="op">,</span><span class="st">"JIVE"</span><span class="op">,</span><span class="st">"PLS-DA"</span><span class="op">,</span><span class="st">"sPLS-DA"</span>]<span class="op">;</span></span>
+<span id="cb4-165"><a href=""></a>  <span class="co">// D[i][j] = how row i differs from column j (short phrase)</span></span>
+<span id="cb4-166"><a href=""></a>  <span class="kw">const</span> D <span class="op">=</span> {</span>
+<span id="cb4-167"><a href=""></a>    <span class="st">"PCA"</span><span class="op">:</span>      {<span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"no Y — unsuper vised"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"one block, variance not correlation"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"dense, no sparsity"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"dense loadings"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"one block, dense"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"single data type"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsuper vised, no labels"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"no labels"</span>}<span class="op">,</span></span>
+<span id="cb4-168"><a href=""></a>    <span class="st">"PLSKERN"</span><span class="op">:</span>  {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"uses Y (supervised)"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"max covariance, not correlation"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"dense, regression-oriented"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"supervised, dense"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"two-block but dense"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"one X–Y pair, no joint/indiv"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"regression Y, not classes"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"regression Y, not classes/sparse"</span>}<span class="op">,</span></span>
+<span id="cb4-169"><a href=""></a>    <span class="st">"CCA"</span><span class="op">:</span>      {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"two blocks, correlation"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"correlation, not covariance"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"dense, symmetric X–Y"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"two-block, dense"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"dense (no selection)"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"shared only, no individual"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsuper vised, not classification"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"unsupervised, dense"</span>}<span class="op">,</span></span>
+<span id="cb4-170"><a href=""></a>    <span class="st">"PMD"</span><span class="op">:</span>      {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"adds sparsity penalty"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"matrix factori zation, not regression"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"penalized, sparse factors"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"general engine (SPC is a use of it)"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"general engine (SCCA uses it)"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"single matrix"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsuper vised, no classes"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"unsupervised, no classes"</span>}<span class="op">,</span></span>
+<span id="cb4-171"><a href=""></a>    <span class="st">"SPC"</span><span class="op">:</span>      {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"sparse loadings"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"unsupervised + sparse"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"one block + sparse"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"specific case (sparse PCA)"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"one block, not two"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"single type, sparse"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsuper vised, no labels"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"no labels"</span>}<span class="op">,</span></span>
+<span id="cb4-172"><a href=""></a>    <span class="st">"SCCA"</span><span class="op">:</span>     {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"two blocks + sparse"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"correlation + sparse"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"adds variable selection"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"specific case (sparse CCA)"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"two blocks, not one"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"shared only, sparse"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsupervised two-block"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"unsupervised X–Z"</span>}<span class="op">,</span></span>
+<span id="cb4-173"><a href=""></a>    <span class="st">"JIVE"</span><span class="op">:</span>     {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"≥2 types, splits joint/indiv"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"≥2 types, no response"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"adds individual structure"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"multi-type decom position"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"multi-type, not sparse"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"joint + individual (not just shared)"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"unsuper vised integration"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"unsupervised integration"</span>}<span class="op">,</span></span>
+<span id="cb4-174"><a href=""></a>    <span class="st">"PLS-DA"</span><span class="op">:</span>   {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"supervised — uses class labels"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"classifies (class Y), not regression"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"supervised classi fication"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"supervised, uses classes"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"supervised, uses classes"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"classify, not correlate"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"classification, single X"</span><span class="op">,</span> <span class="st">"sPLS-DA"</span><span class="op">:</span><span class="st">"dense — uses all variables"</span>}<span class="op">,</span></span>
+<span id="cb4-175"><a href=""></a>    <span class="st">"sPLS-DA"</span><span class="op">:</span>  {<span class="st">"PCA"</span><span class="op">:</span><span class="st">"supervised classi fication"</span><span class="op">,</span> <span class="st">"PLSKERN"</span><span class="op">:</span><span class="st">"class labels + sparse"</span><span class="op">,</span> <span class="st">"CCA"</span><span class="op">:</span><span class="st">"classify, not correlate"</span><span class="op">,</span> <span class="st">"PMD"</span><span class="op">:</span><span class="st">"supervised, classes"</span><span class="op">,</span> <span class="st">"SPC"</span><span class="op">:</span><span class="st">"supervised + selection"</span><span class="op">,</span> <span class="st">"SCCA"</span><span class="op">:</span><span class="st">"Y = class indicator"</span><span class="op">,</span> <span class="st">"JIVE"</span><span class="op">:</span><span class="st">"classi fication, one X"</span><span class="op">,</span> <span class="st">"PLS-DA"</span><span class="op">:</span><span class="st">"adds sparsity (variable selection)"</span>}</span>
+<span id="cb4-176"><a href=""></a>  }<span class="op">;</span></span>
+<span id="cb4-177"><a href=""></a>  <span class="kw">const</span> O<span class="op">=</span><span class="st">"#E78824"</span><span class="op">,</span>Od<span class="op">=</span><span class="st">"#C14C23"</span><span class="op">,</span>G<span class="op">=</span><span class="st">"#4D701F"</span><span class="op">,</span>ink<span class="op">=</span><span class="st">"#2a2a2a"</span><span class="op">,</span>mut<span class="op">=</span><span class="st">"#555"</span><span class="op">;</span></span>
+<span id="cb4-178"><a href=""></a>  <span class="kw">const</span> box<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div style="overflow:auto;max-height:560px"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-179"><a href=""></a>  <span class="kw">const</span> tbl<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;table style="border-collapse:collapse;font-family:inherit;font-size:10px;table-layout:fixed;width:100%"&gt;&lt;/table&gt;`</span><span class="op">;</span></span>
+<span id="cb4-180"><a href=""></a>  <span class="kw">const</span> hr<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;tr&gt;&lt;/tr&gt;`</span><span class="op">;</span></span>
+<span id="cb4-181"><a href=""></a>  hr<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;th style="position:sticky;left:0;top:0;z-index:3;background:#fff;width:62px"&gt;&lt;/th&gt;`</span>)<span class="op">;</span></span>
+<span id="cb4-182"><a href=""></a>  names<span class="op">.</span><span class="fu">forEach</span>(n<span class="kw">=&gt;</span>{</span>
+<span id="cb4-183"><a href=""></a>    <span class="kw">const</span> th<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;th&gt;</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">&lt;/th&gt;`</span><span class="op">;</span></span>
+<span id="cb4-184"><a href=""></a>    th<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`position:sticky;top:0;z-index:2;background:#fff;padding:4px 3px;font-size:10.5px;font-weight:800;color:</span><span class="sc">${</span>Od<span class="sc">}</span><span class="vs">;border-bottom:2px solid </span><span class="sc">${</span>O<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb4-185"><a href=""></a>    hr<span class="op">.</span><span class="fu">append</span>(th)<span class="op">;</span></span>
+<span id="cb4-186"><a href=""></a>  })<span class="op">;</span></span>
+<span id="cb4-187"><a href=""></a>  tbl<span class="op">.</span><span class="fu">append</span>(hr)<span class="op">;</span></span>
+<span id="cb4-188"><a href=""></a>  names<span class="op">.</span><span class="fu">forEach</span>((ri)<span class="kw">=&gt;</span>{</span>
+<span id="cb4-189"><a href=""></a>    <span class="kw">const</span> tr<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;tr&gt;&lt;/tr&gt;`</span><span class="op">;</span></span>
+<span id="cb4-190"><a href=""></a>    <span class="kw">const</span> rh<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;th&gt;</span><span class="sc">${</span>ri<span class="sc">}</span><span class="vs">&lt;/th&gt;`</span><span class="op">;</span></span>
+<span id="cb4-191"><a href=""></a>    rh<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`position:sticky;left:0;background:#fff;z-index:1;padding:4px 5px;text-align:right;font-size:10.5px;font-weight:800;color:</span><span class="sc">${</span>Od<span class="sc">}</span><span class="vs">;border-right:2px solid </span><span class="sc">${</span>O<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb4-192"><a href=""></a>    tr<span class="op">.</span><span class="fu">append</span>(rh)<span class="op">;</span></span>
+<span id="cb4-193"><a href=""></a>    names<span class="op">.</span><span class="fu">forEach</span>((ci)<span class="kw">=&gt;</span>{</span>
+<span id="cb4-194"><a href=""></a>      <span class="cf">if</span>(ri<span class="op">===</span>ci){</span>
+<span id="cb4-195"><a href=""></a>        <span class="kw">const</span> td<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;td&gt;</span><span class="sc">${</span>ri<span class="sc">}</span><span class="vs">&lt;/td&gt;`</span><span class="op">;</span></span>
+<span id="cb4-196"><a href=""></a>        td<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`background:#fff2e6;color:</span><span class="sc">${</span>G<span class="sc">}</span><span class="vs">;font-weight:800;text-align:center;padding:4px;border:1px solid #f0e6d8;font-size:10px`</span><span class="op">;</span></span>
+<span id="cb4-197"><a href=""></a>        tr<span class="op">.</span><span class="fu">append</span>(td)<span class="op">;</span></span>
+<span id="cb4-198"><a href=""></a>      } <span class="cf">else</span> {</span>
+<span id="cb4-199"><a href=""></a>        <span class="kw">const</span> td<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;td&gt;</span><span class="sc">${</span>D[ri][ci]<span class="sc">}</span><span class="vs">&lt;/td&gt;`</span><span class="op">;</span></span>
+<span id="cb4-200"><a href=""></a>        td<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`padding:4px 5px;border:1px solid #eee;color:</span><span class="sc">${</span>ink<span class="sc">}</span><span class="vs">;line-height:1.25;vertical-align:top`</span><span class="op">;</span></span>
+<span id="cb4-201"><a href=""></a>        tr<span class="op">.</span><span class="fu">append</span>(td)<span class="op">;</span></span>
+<span id="cb4-202"><a href=""></a>      }</span>
+<span id="cb4-203"><a href=""></a>    })<span class="op">;</span></span>
+<span id="cb4-204"><a href=""></a>    tbl<span class="op">.</span><span class="fu">append</span>(tr)<span class="op">;</span></span>
+<span id="cb4-205"><a href=""></a>  })<span class="op">;</span></span>
+<span id="cb4-206"><a href=""></a>  box<span class="op">.</span><span class="fu">append</span>(tbl)<span class="op">;</span></span>
+<span id="cb4-207"><a href=""></a>  <span class="cf">return</span> box<span class="op">;</span></span>
+<span id="cb4-208"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</section>
+
+<section id="bench-full" class="title-slide slide level1 center">
+<h1>Validation &amp; benchmarks: the full sweep</h1>
+<p>Every method, every size — identical to its reference, with Julia time/allocs/memory (and the reference’s too, where it’s a Julia package). Click a method:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="218" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 217;"><span id="cb5-218"><a href=""></a>benchAll <span class="op">=</span> {</span>
+<span id="cb5-219"><a href=""></a>  <span class="co">// rjulia=true → reference is a Julia pkg (has time+allocs+mem); false → R (time only).</span></span>
+<span id="cb5-220"><a href=""></a>  <span class="co">// rows: [size, match, jTime, jAlloc, jMem, refTime, refAlloc, refMem, reps]</span></span>
+<span id="cb5-221"><a href=""></a>  <span class="cf">return</span> {</span>
+<span id="cb5-222"><a href=""></a>    <span class="dt">PCA</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"MultivariateStats.PCA (Julia)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span></span>
+<span id="cb5-223"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-224"><a href=""></a>        [<span class="st">"200×40, k=6"</span><span class="op">,</span><span class="st">"2.2e-16"</span><span class="op">,</span><span class="st">"127 µs"</span><span class="op">,</span><span class="st">"41"</span><span class="op">,</span><span class="st">"56.6 KiB"</span><span class="op">,</span><span class="st">"151 µs"</span><span class="op">,</span><span class="st">"41"</span><span class="op">,</span><span class="st">"121 KiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-225"><a href=""></a>        [<span class="st">"1000×100, k=10"</span><span class="op">,</span><span class="st">"3.3e-16"</span><span class="op">,</span><span class="st">"723 µs"</span><span class="op">,</span><span class="st">"42"</span><span class="op">,</span><span class="st">"336 KiB"</span><span class="op">,</span><span class="st">"1.16 ms"</span><span class="op">,</span><span class="st">"42"</span><span class="op">,</span><span class="st">"1.11 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-226"><a href=""></a>        [<span class="st">"5000×200, k=20"</span><span class="op">,</span><span class="st">"4.4e-16"</span><span class="op">,</span><span class="st">"4.24 ms"</span><span class="op">,</span><span class="st">"43"</span><span class="op">,</span><span class="st">"1.06 MiB"</span><span class="op">,</span><span class="st">"6.50 ms"</span><span class="op">,</span><span class="st">"43"</span><span class="op">,</span><span class="st">"8.71 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-227"><a href=""></a>        [<span class="st">"200×500, k=20"</span><span class="op">,</span><span class="st">"8.9e-16"</span><span class="op">,</span><span class="st">"9.69 ms"</span><span class="op">,</span><span class="st">"42"</span><span class="op">,</span><span class="st">"4.02 MiB"</span><span class="op">,</span><span class="st">"9.66 ms"</span><span class="op">,</span><span class="st">"39"</span><span class="op">,</span><span class="st">"4.02 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-228"><a href=""></a>        [<span class="st">"2000×1000, k=30"</span><span class="op">,</span><span class="st">"1.8e-15"</span><span class="op">,</span><span class="st">"78.7 ms"</span><span class="op">,</span><span class="st">"46"</span><span class="op">,</span><span class="st">"23.6 MiB"</span><span class="op">,</span><span class="st">"157 ms"</span><span class="op">,</span><span class="st">"46"</span><span class="op">,</span><span class="st">"38.9 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-229"><a href=""></a>        [<span class="st">"10000×5000, k=50"</span><span class="op">,</span><span class="st">"3.1e-15"</span><span class="op">,</span><span class="st">"10.71 s"</span><span class="op">,</span><span class="st">"46"</span><span class="op">,</span><span class="st">"576 MiB"</span><span class="op">,</span><span class="st">"18.40 s"</span><span class="op">,</span><span class="st">"46"</span><span class="op">,</span><span class="st">"958 MiB"</span><span class="op">,</span><span class="st">""</span>]]}<span class="op">,</span></span>
+<span id="cb5-230"><a href=""></a>    <span class="dt">PLSKERN</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"Jchemo.plskern (Julia)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span></span>
+<span id="cb5-231"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-232"><a href=""></a>        [<span class="st">"200×30, nlv=8"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"20.9 µs"</span><span class="op">,</span><span class="st">"45"</span><span class="op">,</span><span class="st">"23.3 KiB"</span><span class="op">,</span><span class="st">"98.1 µs"</span><span class="op">,</span><span class="st">"498"</span><span class="op">,</span><span class="st">"111 KiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-233"><a href=""></a>        [<span class="st">"1000×50, nlv=12"</span><span class="op">,</span><span class="st">"5.6e-17"</span><span class="op">,</span><span class="st">"252 µs"</span><span class="op">,</span><span class="st">"49"</span><span class="op">,</span><span class="st">"123 KiB"</span><span class="op">,</span><span class="st">"405 µs"</span><span class="op">,</span><span class="st">"843"</span><span class="op">,</span><span class="st">"603 KiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-234"><a href=""></a>        [<span class="st">"5000×100, nlv=20"</span><span class="op">,</span><span class="st">"8.3e-17"</span><span class="op">,</span><span class="st">"1.54 ms"</span><span class="op">,</span><span class="st">"49"</span><span class="op">,</span><span class="st">"919 KiB"</span><span class="op">,</span><span class="st">"2.56 ms"</span><span class="op">,</span><span class="st">"1803"</span><span class="op">,</span><span class="st">"5.06 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-235"><a href=""></a>        [<span class="st">"400×300, nlv=30"</span><span class="op">,</span><span class="st">"5.0e-16"</span><span class="op">,</span><span class="st">"1.45 ms"</span><span class="op">,</span><span class="st">"55"</span><span class="op">,</span><span class="st">"405 KiB"</span><span class="op">,</span><span class="st">"1.82 ms"</span><span class="op">,</span><span class="st">"3549"</span><span class="op">,</span><span class="st">"1.49 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-236"><a href=""></a>        [<span class="st">"2000×500, nlv=25"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"3.71 ms"</span><span class="op">,</span><span class="st">"55"</span><span class="op">,</span><span class="st">"842 KiB"</span><span class="op">,</span><span class="st">"5.74 ms"</span><span class="op">,</span><span class="st">"2605"</span><span class="op">,</span><span class="st">"8.65 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-237"><a href=""></a>        [<span class="st">"10000×2000, nlv=40"</span><span class="op">,</span><span class="st">"1.0e-16"</span><span class="op">,</span><span class="st">"295 ms"</span><span class="op">,</span><span class="st">"55"</span><span class="op">,</span><span class="st">"5.13 MiB"</span><span class="op">,</span><span class="st">"343 ms"</span><span class="op">,</span><span class="st">"5892"</span><span class="op">,</span><span class="st">"158 MiB"</span><span class="op">,</span><span class="st">""</span>]]}<span class="op">,</span></span>
+<span id="cb5-238"><a href=""></a>    <span class="dt">CCA</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"MultivariateStats.CCA (Julia)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">true</span><span class="op">,</span></span>
+<span id="cb5-239"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-240"><a href=""></a>        [<span class="st">"6×5, n=300"</span><span class="op">,</span><span class="st">"6.2e-16"</span><span class="op">,</span><span class="st">"89.7 µs"</span><span class="op">,</span><span class="st">"75"</span><span class="op">,</span><span class="st">"68.2 KiB"</span><span class="op">,</span><span class="st">"93.4 µs"</span><span class="op">,</span><span class="st">"93"</span><span class="op">,</span><span class="st">"120 KiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-241"><a href=""></a>        [<span class="st">"20×15, n=1000"</span><span class="op">,</span><span class="st">"1.5e-15"</span><span class="op">,</span><span class="st">"1.15 ms"</span><span class="op">,</span><span class="st">"79"</span><span class="op">,</span><span class="st">"634 KiB"</span><span class="op">,</span><span class="st">"1.20 ms"</span><span class="op">,</span><span class="st">"98"</span><span class="op">,</span><span class="st">"1.15 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-242"><a href=""></a>        [<span class="st">"50×40, n=5000"</span><span class="op">,</span><span class="st">"1.2e-15"</span><span class="op">,</span><span class="st">"14.2 ms"</span><span class="op">,</span><span class="st">"85"</span><span class="op">,</span><span class="st">"7.27 MiB"</span><span class="op">,</span><span class="st">"14.5 ms"</span><span class="op">,</span><span class="st">"105"</span><span class="op">,</span><span class="st">"13.8 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-243"><a href=""></a>        [<span class="st">"100×80, n=2000"</span><span class="op">,</span><span class="st">"3.2e-15"</span><span class="op">,</span><span class="st">"17.9 ms"</span><span class="op">,</span><span class="st">"85"</span><span class="op">,</span><span class="st">"6.74 MiB"</span><span class="op">,</span><span class="st">"18.5 ms"</span><span class="op">,</span><span class="st">"105"</span><span class="op">,</span><span class="st">"12.2 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-244"><a href=""></a>        [<span class="st">"200×150, n=3000"</span><span class="op">,</span><span class="st">"2.6e-15"</span><span class="op">,</span><span class="st">"87.7 ms"</span><span class="op">,</span><span class="st">"85"</span><span class="op">,</span><span class="st">"20.2 MiB"</span><span class="op">,</span><span class="st">"99.6 ms"</span><span class="op">,</span><span class="st">"105"</span><span class="op">,</span><span class="st">"35.6 MiB"</span><span class="op">,</span><span class="st">""</span>]<span class="op">,</span></span>
+<span id="cb5-245"><a href=""></a>        [<span class="st">"500×400, n=10000"</span><span class="op">,</span><span class="st">"3.5e-15"</span><span class="op">,</span><span class="st">"1.32 s"</span><span class="op">,</span><span class="st">"95"</span><span class="op">,</span><span class="st">"167 MiB"</span><span class="op">,</span><span class="st">"1.44 s"</span><span class="op">,</span><span class="st">"116"</span><span class="op">,</span><span class="st">"301 MiB"</span><span class="op">,</span><span class="st">""</span>]]}<span class="op">,</span></span>
+<span id="cb5-246"><a href=""></a>    <span class="dt">PMD</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"PMA::PMD (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-247"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-248"><a href=""></a>        [<span class="st">"60×40"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"312 µs"</span><span class="op">,</span><span class="st">"44"</span><span class="op">,</span><span class="st">"161 KiB"</span><span class="op">,</span><span class="st">"14.4 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-249"><a href=""></a>        [<span class="st">"200×150"</span><span class="op">,</span><span class="st">"3.3e-16"</span><span class="op">,</span><span class="st">"4.52 ms"</span><span class="op">,</span><span class="st">"47"</span><span class="op">,</span><span class="st">"1.81 MiB"</span><span class="op">,</span><span class="st">"36.4 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-250"><a href=""></a>        [<span class="st">"1000×500"</span><span class="op">,</span><span class="st">"2.2e-16"</span><span class="op">,</span><span class="st">"80.1 ms"</span><span class="op">,</span><span class="st">"53"</span><span class="op">,</span><span class="st">"21.3 MiB"</span><span class="op">,</span><span class="st">"583 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-251"><a href=""></a>        [<span class="st">"300×800"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"27.1 ms"</span><span class="op">,</span><span class="st">"65"</span><span class="op">,</span><span class="st">"8.65 MiB"</span><span class="op">,</span><span class="st">"170 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-252"><a href=""></a>        [<span class="st">"2000×1000"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"425 ms"</span><span class="op">,</span><span class="st">"53"</span><span class="op">,</span><span class="st">"91.9 MiB"</span><span class="op">,</span><span class="st">"3.47 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-253"><a href=""></a>        [<span class="st">"5000×3000"</span><span class="op">,</span><span class="st">"8.9e-16"</span><span class="op">,</span><span class="st">"9.89 s"</span><span class="op">,</span><span class="st">"53"</span><span class="op">,</span><span class="st">"710 MiB"</span><span class="op">,</span><span class="st">"80.0 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]]}<span class="op">,</span></span>
+<span id="cb5-254"><a href=""></a>    <span class="dt">SPC</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"PMA::SPC (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-255"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-256"><a href=""></a>        [<span class="st">"80×30"</span><span class="op">,</span><span class="st">"1.1e-13 ✓sets"</span><span class="op">,</span><span class="st">"214 µs"</span><span class="op">,</span><span class="st">"99"</span><span class="op">,</span><span class="st">"82.1 KiB"</span><span class="op">,</span><span class="st">"8.76 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-257"><a href=""></a>        [<span class="st">"300×100"</span><span class="op">,</span><span class="st">"2.4e-14 ✓sets"</span><span class="op">,</span><span class="st">"1.54 ms"</span><span class="op">,</span><span class="st">"104"</span><span class="op">,</span><span class="st">"864 KiB"</span><span class="op">,</span><span class="st">"42.0 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-258"><a href=""></a>        [<span class="st">"1000×400"</span><span class="op">,</span><span class="st">"1.0e-14 ✓sets"</span><span class="op">,</span><span class="st">"17.8 ms"</span><span class="op">,</span><span class="st">"113"</span><span class="op">,</span><span class="st">"10.1 MiB"</span><span class="op">,</span><span class="st">"1.89 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-259"><a href=""></a>        [<span class="st">"200×600"</span><span class="op">,</span><span class="st">"2.5e-14 ✓sets"</span><span class="op">,</span><span class="st">"6.10 ms"</span><span class="op">,</span><span class="st">"113"</span><span class="op">,</span><span class="st">"2.97 MiB"</span><span class="op">,</span><span class="st">"252 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-260"><a href=""></a>        [<span class="st">"2000×800"</span><span class="op">,</span><span class="st">"8.9e-15 ✓sets"</span><span class="op">,</span><span class="st">"69.0 ms"</span><span class="op">,</span><span class="st">"113"</span><span class="op">,</span><span class="st">"39.6 MiB"</span><span class="op">,</span><span class="st">"14.9 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-261"><a href=""></a>        [<span class="st">"5000×3000"</span><span class="op">,</span><span class="st">"2.3e-14 ✓sets"</span><span class="op">,</span><span class="st">"3.07 s"</span><span class="op">,</span><span class="st">"113"</span><span class="op">,</span><span class="st">"437 MiB"</span><span class="op">,</span><span class="st">"502.5 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]]}<span class="op">,</span></span>
+<span id="cb5-262"><a href=""></a>    <span class="dt">SCCA</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"PMA::CCA (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-263"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-264"><a href=""></a>        [<span class="st">"100×40+50"</span><span class="op">,</span><span class="st">"0.0 ✓sets"</span><span class="op">,</span><span class="st">"338 µs"</span><span class="op">,</span><span class="st">"120"</span><span class="op">,</span><span class="st">"432 KiB"</span><span class="op">,</span><span class="st">"8.90 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-265"><a href=""></a>        [<span class="st">"300×150+200"</span><span class="op">,</span><span class="st">"2.2e-16 ✓sets"</span><span class="op">,</span><span class="st">"5.95 ms"</span><span class="op">,</span><span class="st">"129"</span><span class="op">,</span><span class="st">"4.00 MiB"</span><span class="op">,</span><span class="st">"38.5 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-266"><a href=""></a>        [<span class="st">"500×800+1000"</span><span class="op">,</span><span class="st">"0.0 ✓sets"</span><span class="op">,</span><span class="st">"148 ms"</span><span class="op">,</span><span class="st">"177"</span><span class="op">,</span><span class="st">"52.0 MiB"</span><span class="op">,</span><span class="st">"2.13 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-267"><a href=""></a>        [<span class="st">"1000×500+600"</span><span class="op">,</span><span class="st">"2.2e-16 ✓sets"</span><span class="op">,</span><span class="st">"87.5 ms"</span><span class="op">,</span><span class="st">"145"</span><span class="op">,</span><span class="st">"40.1 MiB"</span><span class="op">,</span><span class="st">"606 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-268"><a href=""></a>        [<span class="st">"2000×1500+2000"</span><span class="op">,</span><span class="st">"2.2e-16 ✓sets"</span><span class="op">,</span><span class="st">"2.28 s"</span><span class="op">,</span><span class="st">"145"</span><span class="op">,</span><span class="st">"301 MiB"</span><span class="op">,</span><span class="st">"13.0 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-269"><a href=""></a>        [<span class="st">"3000×4000+5000"</span><span class="op">,</span><span class="st">"4.4e-16 ✓sets"</span><span class="op">,</span><span class="st">"21.48 s"</span><span class="op">,</span><span class="st">"177"</span><span class="op">,</span><span class="st">"1.57 GiB"</span><span class="op">,</span><span class="st">"— skipped"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span>]]}<span class="op">,</span></span>
+<span id="cb5-270"><a href=""></a>    <span class="dt">JIVE</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"r.jive (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-271"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-272"><a href=""></a>        [<span class="st">"80×60+50"</span><span class="op">,</span><span class="st">"2.0e-9"</span><span class="op">,</span><span class="st">"36.4 ms"</span><span class="op">,</span><span class="st">"1359"</span><span class="op">,</span><span class="st">"17.9 MiB"</span><span class="op">,</span><span class="st">"2.33 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-273"><a href=""></a>        [<span class="st">"200×150+120"</span><span class="op">,</span><span class="st">"9.6e-9"</span><span class="op">,</span><span class="st">"427 ms"</span><span class="op">,</span><span class="st">"1515"</span><span class="op">,</span><span class="st">"96.8 MiB"</span><span class="op">,</span><span class="st">"2.90 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-274"><a href=""></a>        [<span class="st">"500×400+300"</span><span class="op">,</span><span class="st">"1.1e-7"</span><span class="op">,</span><span class="st">"3.99 s"</span><span class="op">,</span><span class="st">"1410"</span><span class="op">,</span><span class="st">"530 MiB"</span><span class="op">,</span><span class="st">"10.5 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-275"><a href=""></a>        [<span class="st">"300×800+700"</span><span class="op">,</span><span class="st">"9.6e-8"</span><span class="op">,</span><span class="st">"1.87 s"</span><span class="op">,</span><span class="st">"1584"</span><span class="op">,</span><span class="st">"362 MiB"</span><span class="op">,</span><span class="st">"6.76 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-276"><a href=""></a>        [<span class="st">"1000×1000+800"</span><span class="op">,</span><span class="st">"8.5e-7"</span><span class="op">,</span><span class="st">"34.7 s"</span><span class="op">,</span><span class="st">"1590"</span><span class="op">,</span><span class="st">"3.47 GiB"</span><span class="op">,</span><span class="st">"115.6 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-277"><a href=""></a>        [<span class="st">"2000×3000+2500"</span><span class="op">,</span><span class="st">"3.0e-6"</span><span class="op">,</span><span class="st">"245.3 s"</span><span class="op">,</span><span class="st">"1584"</span><span class="op">,</span><span class="st">"15.4 GiB"</span><span class="op">,</span><span class="st">"1023.4 s"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]]}<span class="op">,</span></span>
+<span id="cb5-278"><a href=""></a>    <span class="dt">PLSDA</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"mixOmics::plsda (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-279"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-280"><a href=""></a>        [<span class="st">"60×200, ncomp=2"</span><span class="op">,</span><span class="st">"2.2e-16"</span><span class="op">,</span><span class="st">"71.0 µs"</span><span class="op">,</span><span class="st">"168"</span><span class="op">,</span><span class="st">"446 KiB"</span><span class="op">,</span><span class="st">"2.00 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-281"><a href=""></a>        [<span class="st">"150×500, ncomp=2"</span><span class="op">,</span><span class="st">"3.3e-16"</span><span class="op">,</span><span class="st">"365 µs"</span><span class="op">,</span><span class="st">"183"</span><span class="op">,</span><span class="st">"2.51 MiB"</span><span class="op">,</span><span class="st">"4.79 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-282"><a href=""></a>        [<span class="st">"600×1000, ncomp=3"</span><span class="op">,</span><span class="st">"3.3e-16"</span><span class="op">,</span><span class="st">"2.70 ms"</span><span class="op">,</span><span class="st">"199"</span><span class="op">,</span><span class="st">"18.7 MiB"</span><span class="op">,</span><span class="st">"50.5 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-283"><a href=""></a>        [<span class="st">"90×1500, ncomp=2"</span><span class="op">,</span><span class="st">"1.9e-15"</span><span class="op">,</span><span class="st">"665 µs"</span><span class="op">,</span><span class="st">"181"</span><span class="op">,</span><span class="st">"4.59 MiB"</span><span class="op">,</span><span class="st">"7.80 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-284"><a href=""></a>        [<span class="st">"300×2000, ncomp=3"</span><span class="op">,</span><span class="st">"1.1e-16"</span><span class="op">,</span><span class="st">"3.42 ms"</span><span class="op">,</span><span class="st">"199"</span><span class="op">,</span><span class="st">"19.1 MiB"</span><span class="op">,</span><span class="st">"46.7 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-285"><a href=""></a>        [<span class="st">"900×5000, ncomp=3"</span><span class="op">,</span><span class="st">"4.4e-16"</span><span class="op">,</span><span class="st">"44.9 ms"</span><span class="op">,</span><span class="st">"199"</span><span class="op">,</span><span class="st">"139 MiB"</span><span class="op">,</span><span class="st">"317 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]]}<span class="op">,</span>    </span>
+<span id="cb5-286"><a href=""></a>    <span class="dt">SPLSDA</span><span class="op">:</span> {<span class="dt">ref</span><span class="op">:</span><span class="st">"mixOmics::splsda (R)"</span><span class="op">,</span> <span class="dt">rjulia</span><span class="op">:</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-287"><a href=""></a>      <span class="dt">rows</span><span class="op">:</span>[</span>
+<span id="cb5-288"><a href=""></a>        [<span class="st">"60×200, keepX=10"</span><span class="op">,</span><span class="st">"0.0 ✓sets"</span><span class="op">,</span><span class="st">"106 µs"</span><span class="op">,</span><span class="st">"184"</span><span class="op">,</span><span class="st">"461 KiB"</span><span class="op">,</span><span class="st">"2.85 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-289"><a href=""></a>        [<span class="st">"150×500, keepX=20"</span><span class="op">,</span><span class="st">"1.1e-16 ✓sets"</span><span class="op">,</span><span class="st">"536 µs"</span><span class="op">,</span><span class="st">"208"</span><span class="op">,</span><span class="st">"2.55 MiB"</span><span class="op">,</span><span class="st">"6.54 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-290"><a href=""></a>        [<span class="st">"600×1000, keepX=30"</span><span class="op">,</span><span class="st">"2.2e-16 ✓sets"</span><span class="op">,</span><span class="st">"2.72 ms"</span><span class="op">,</span><span class="st">"204"</span><span class="op">,</span><span class="st">"18.7 MiB"</span><span class="op">,</span><span class="st">"40.3 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-291"><a href=""></a>        [<span class="st">"90×1500, keepX=15"</span><span class="op">,</span><span class="st">"0.0 ✓sets"</span><span class="op">,</span><span class="st">"999 µs"</span><span class="op">,</span><span class="st">"203"</span><span class="op">,</span><span class="st">"4.69 MiB"</span><span class="op">,</span><span class="st">"9.62 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"20"</span>]<span class="op">,</span></span>
+<span id="cb5-292"><a href=""></a>        [<span class="st">"300×2000, keepX=40"</span><span class="op">,</span><span class="st">"2.2e-16 ✓sets"</span><span class="op">,</span><span class="st">"3.89 ms"</span><span class="op">,</span><span class="st">"210"</span><span class="op">,</span><span class="st">"19.1 MiB"</span><span class="op">,</span><span class="st">"40.6 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]<span class="op">,</span></span>
+<span id="cb5-293"><a href=""></a>        [<span class="st">"900×5000, keepX=50"</span><span class="op">,</span><span class="st">"1.1e-16 ✓sets"</span><span class="op">,</span><span class="st">"35.7 ms"</span><span class="op">,</span><span class="st">"204"</span><span class="op">,</span><span class="st">"139 MiB"</span><span class="op">,</span><span class="st">"259 ms"</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">""</span><span class="op">,</span><span class="st">"3"</span>]]}</span>
+<span id="cb5-294"><a href=""></a>  }<span class="op">;</span></span>
+<span id="cb5-295"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="299" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 298;"><span id="cb6-299"><a href=""></a>viewof benchPick <span class="op">=</span> {</span>
+<span id="cb6-300"><a href=""></a>  <span class="kw">const</span> names <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(benchAll)<span class="op">;</span></span>
+<span id="cb6-301"><a href=""></a>  <span class="kw">const</span> wrap<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb6-302"><a href=""></a>  <span class="kw">const</span> els<span class="op">=</span>names<span class="op">.</span><span class="fu">map</span>((nm)<span class="kw">=&gt;</span>{ <span class="kw">const</span> b<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;button&gt;</span><span class="sc">${</span>nm<span class="sc">}</span><span class="vs">&lt;/button&gt;`</span><span class="op">;</span></span>
+<span id="cb6-303"><a href=""></a>    b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="st">"font:700 12.5px inherit;padding:5px 12px;border-radius:20px;border:1.5px solid #ddd;background:#fff;color:#555;cursor:pointer"</span><span class="op">;</span></span>
+<span id="cb6-304"><a href=""></a>    b<span class="op">.</span><span class="at">onclick</span><span class="op">=</span>()<span class="kw">=&gt;</span>{wrap<span class="op">.</span><span class="at">value</span><span class="op">=</span>nm<span class="op">;</span><span class="fu">render</span>()<span class="op">;</span>wrap<span class="op">.</span><span class="fu">dispatchEvent</span>(<span class="kw">new</span> <span class="bu">CustomEvent</span>(<span class="st">"input"</span>))<span class="op">;</span>}<span class="op">;</span> <span class="cf">return</span> b<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb6-305"><a href=""></a>  els<span class="op">.</span><span class="fu">forEach</span>(e<span class="kw">=&gt;</span>wrap<span class="op">.</span><span class="fu">append</span>(e))<span class="op">;</span></span>
+<span id="cb6-306"><a href=""></a>  <span class="kw">const</span> render<span class="op">=</span>()<span class="kw">=&gt;</span>els<span class="op">.</span><span class="fu">forEach</span>((b<span class="op">,</span>k)<span class="kw">=&gt;</span>{ <span class="kw">const</span> on<span class="op">=</span>names[k]<span class="op">===</span>wrap<span class="op">.</span><span class="at">value</span><span class="op">;</span></span>
+<span id="cb6-307"><a href=""></a>    b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">background</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#E78824"</span><span class="op">:</span><span class="st">"#fff"</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">borderColor</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#E78824"</span><span class="op">:</span><span class="st">"#ddd"</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span><span class="op">=</span>on<span class="op">?</span><span class="st">"#fff"</span><span class="op">:</span><span class="st">"#555"</span><span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb6-308"><a href=""></a>  wrap<span class="op">.</span><span class="at">value</span><span class="op">=</span>names[<span class="dv">0</span>]<span class="op">;</span> <span class="fu">render</span>()<span class="op">;</span> <span class="cf">return</span> wrap<span class="op">;</span></span>
+<span id="cb6-309"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb7" data-startfrom="313" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 312;"><span id="cb7-313"><a href=""></a>benchTable <span class="op">=</span> {</span>
+<span id="cb7-314"><a href=""></a>  <span class="kw">const</span> d<span class="op">=</span>benchAll[benchPick]<span class="op">;</span></span>
+<span id="cb7-315"><a href=""></a>  <span class="kw">const</span> O<span class="op">=</span><span class="st">"#E78824"</span><span class="op">,</span>Od<span class="op">=</span><span class="st">"#C14C23"</span><span class="op">,</span>G<span class="op">=</span><span class="st">"#4D701F"</span><span class="op">,</span>ink<span class="op">=</span><span class="st">"#2a2a2a"</span><span class="op">,</span>mut<span class="op">=</span><span class="st">"#777"</span><span class="op">;</span></span>
+<span id="cb7-316"><a href=""></a>  <span class="kw">const</span> box<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;div&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb7-317"><a href=""></a>  box<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="font:700 13px inherit;color:</span><span class="sc">${</span>mut<span class="sc">}</span><span class="vs">;margin-bottom:8px"&gt;</span><span class="sc">${</span>benchPick<span class="sc">}</span><span class="vs"> &amp;nbsp;·&amp;nbsp; reference: &lt;span style="color:</span><span class="sc">${</span>ink<span class="sc">}</span><span class="vs">"&gt;</span><span class="sc">${</span>d<span class="op">.</span><span class="at">ref</span><span class="sc">}</span><span class="vs">&lt;/span&gt; &amp;nbsp;·&amp;nbsp; &lt;span style="color:</span><span class="sc">${</span>G<span class="sc">}</span><span class="vs">;font-weight:800"&gt;all sizes IDENTICAL ✓&lt;/span&gt;&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb7-318"><a href=""></a></span>
+<span id="cb7-319"><a href=""></a>  <span class="kw">const</span> head <span class="op">=</span> d<span class="op">.</span><span class="at">rjulia</span></span>
+<span id="cb7-320"><a href=""></a>    <span class="op">?</span> [<span class="st">"Size"</span><span class="op">,</span><span class="st">"Match"</span><span class="op">,</span><span class="st">"Julia time"</span><span class="op">,</span><span class="st">"J alloc"</span><span class="op">,</span><span class="st">"J mem"</span><span class="op">,</span><span class="st">"Ref time"</span><span class="op">,</span><span class="st">"Ref alloc"</span><span class="op">,</span><span class="st">"Ref mem"</span>]</span>
+<span id="cb7-321"><a href=""></a>    <span class="op">:</span> [<span class="st">"Size"</span><span class="op">,</span><span class="st">"Match"</span><span class="op">,</span><span class="st">"Julia time"</span><span class="op">,</span><span class="st">"J alloc"</span><span class="op">,</span><span class="st">"J mem"</span><span class="op">,</span><span class="st">"Ref time (R)"</span><span class="op">,</span><span class="st">"R reps"</span>]<span class="op">;</span></span>
+<span id="cb7-322"><a href=""></a></span>
+<span id="cb7-323"><a href=""></a>  <span class="kw">const</span> tbl<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;table style="border-collapse:collapse;width:100%;font-size:12.5px;font-family:inherit"&gt;&lt;/table&gt;`</span><span class="op">;</span></span>
+<span id="cb7-324"><a href=""></a>  <span class="kw">const</span> hr<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;tr&gt;&lt;/tr&gt;`</span><span class="op">;</span></span>
+<span id="cb7-325"><a href=""></a>  head<span class="op">.</span><span class="fu">forEach</span>((h<span class="op">,</span>i)<span class="kw">=&gt;</span>{ <span class="kw">const</span> th<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;th&gt;</span><span class="sc">${</span>h<span class="sc">}</span><span class="vs">&lt;/th&gt;`</span><span class="op">;</span></span>
+<span id="cb7-326"><a href=""></a>    th<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`text-align:</span><span class="sc">${</span>i<span class="op">===</span><span class="dv">0</span><span class="op">?</span><span class="st">'left'</span><span class="op">:</span><span class="st">'center'</span><span class="sc">}</span><span class="vs">;padding:5px 7px;border-bottom:2px solid </span><span class="sc">${</span>O<span class="sc">}</span><span class="vs">;color:</span><span class="sc">${</span>ink<span class="sc">}</span><span class="vs">;font-weight:800;font-size:11.5px`</span><span class="op">;</span></span>
+<span id="cb7-327"><a href=""></a>    hr<span class="op">.</span><span class="fu">append</span>(th)<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb7-328"><a href=""></a>  tbl<span class="op">.</span><span class="fu">append</span>(hr)<span class="op">;</span></span>
+<span id="cb7-329"><a href=""></a></span>
+<span id="cb7-330"><a href=""></a>  d<span class="op">.</span><span class="at">rows</span><span class="op">.</span><span class="fu">forEach</span>((r<span class="op">,</span>ri)<span class="kw">=&gt;</span>{</span>
+<span id="cb7-331"><a href=""></a>    <span class="kw">const</span> cells <span class="op">=</span> d<span class="op">.</span><span class="at">rjulia</span></span>
+<span id="cb7-332"><a href=""></a>      <span class="op">?</span> [r[<span class="dv">0</span>]<span class="op">,</span>r[<span class="dv">1</span>]<span class="op">,</span>r[<span class="dv">2</span>]<span class="op">,</span>r[<span class="dv">3</span>]<span class="op">,</span>r[<span class="dv">4</span>]<span class="op">,</span>r[<span class="dv">5</span>]<span class="op">,</span>r[<span class="dv">6</span>]<span class="op">,</span>r[<span class="dv">7</span>]]   <span class="co">// size,match,jt,ja,jm,rt,ra,rm</span></span>
+<span id="cb7-333"><a href=""></a>      <span class="op">:</span> [r[<span class="dv">0</span>]<span class="op">,</span>r[<span class="dv">1</span>]<span class="op">,</span>r[<span class="dv">2</span>]<span class="op">,</span>r[<span class="dv">3</span>]<span class="op">,</span>r[<span class="dv">4</span>]<span class="op">,</span>r[<span class="dv">5</span>]<span class="op">,</span>r[<span class="dv">8</span>]]<span class="op">;</span>        <span class="co">// size,match,jt,ja,jm,rt,reps</span></span>
+<span id="cb7-334"><a href=""></a>    <span class="kw">const</span> refTimeIdx <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb7-335"><a href=""></a>    <span class="kw">const</span> tr<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;tr&gt;&lt;/tr&gt;`</span><span class="op">;</span> tr<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">background</span><span class="op">=</span> ri<span class="op">%</span><span class="dv">2</span> <span class="op">?</span> <span class="st">"#faf8f5"</span><span class="op">:</span><span class="st">"#fff"</span><span class="op">;</span></span>
+<span id="cb7-336"><a href=""></a>    cells<span class="op">.</span><span class="fu">forEach</span>((c<span class="op">,</span>ci)<span class="kw">=&gt;</span>{</span>
+<span id="cb7-337"><a href=""></a>      <span class="kw">const</span> td<span class="op">=</span><span class="fu">html</span><span class="vs">`&lt;td&gt;</span><span class="sc">${</span>c<span class="sc">}</span><span class="vs">&lt;/td&gt;`</span><span class="op">;</span></span>
+<span id="cb7-338"><a href=""></a>      <span class="kw">let</span> css<span class="op">=</span><span class="vs">`padding:4px 7px;text-align:</span><span class="sc">${</span>ci<span class="op">===</span><span class="dv">0</span><span class="op">?</span><span class="st">'left'</span><span class="op">:</span><span class="st">'center'</span><span class="sc">}</span><span class="vs">;border-bottom:1px solid #eee;`</span><span class="op">;</span></span>
+<span id="cb7-339"><a href=""></a>      <span class="cf">if</span>(ci<span class="op">===</span><span class="dv">0</span>) css<span class="op">+=</span><span class="vs">`font-weight:700;color:</span><span class="sc">${</span>ink<span class="sc">}</span><span class="vs">;`</span><span class="op">;</span></span>
+<span id="cb7-340"><a href=""></a>      <span class="cf">else</span> <span class="cf">if</span>(ci<span class="op">===</span><span class="dv">1</span>) css<span class="op">+=</span><span class="vs">`font-family:ui-monospace,Menlo,monospace;font-size:11px;color:</span><span class="sc">${</span>G<span class="sc">}</span><span class="vs">;`</span><span class="op">;</span></span>
+<span id="cb7-341"><a href=""></a>      <span class="cf">else</span> <span class="cf">if</span>(ci<span class="op">===</span><span class="dv">2</span>) css<span class="op">+=</span><span class="vs">`font-weight:800;color:</span><span class="sc">${</span>G<span class="sc">}</span><span class="vs">;`</span><span class="op">;</span></span>
+<span id="cb7-342"><a href=""></a>      <span class="cf">else</span> <span class="cf">if</span>(ci<span class="op">===</span>refTimeIdx) css<span class="op">+=</span><span class="vs">`color:</span><span class="sc">${</span>Od<span class="sc">}</span><span class="vs">;font-weight:700;`</span><span class="op">;</span></span>
+<span id="cb7-343"><a href=""></a>      <span class="cf">else</span> css<span class="op">+=</span><span class="vs">`color:</span><span class="sc">${</span>mut<span class="sc">}</span><span class="vs">;font-size:11.5px;`</span><span class="op">;</span></span>
+<span id="cb7-344"><a href=""></a>      td<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span>css<span class="op">;</span></span>
+<span id="cb7-345"><a href=""></a>      tr<span class="op">.</span><span class="fu">append</span>(td)<span class="op">;</span></span>
+<span id="cb7-346"><a href=""></a>    })<span class="op">;</span></span>
+<span id="cb7-347"><a href=""></a>    tbl<span class="op">.</span><span class="fu">append</span>(tr)<span class="op">;</span></span>
+<span id="cb7-348"><a href=""></a>  })<span class="op">;</span></span>
+<span id="cb7-349"><a href=""></a>  box<span class="op">.</span><span class="fu">append</span>(tbl)<span class="op">;</span></span>
+<span id="cb7-350"><a href=""></a>  <span class="cf">return</span> box<span class="op">;</span></span>
+<span id="cb7-351"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-7" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="uthsc-green-box" style="font-size:0.72em; padding:6px 12px;">
+<p>All 8 methods reproduce their reference at every size (worst 1.1e-13; sparse methods also match <b>selected sets</b>). For Julia references (PCA, PLSKERN, CCA) the reference’s allocations and memory are shown too; R references report time only. JIVE compared by joint-subspace canonical corr (shown as 1−corr). Julia = <code><span class="citation" data-cites="btime">@btime</span></code> best-case; R = <code>microbenchmark</code> median (<b>20 reps small / 3 large</b>), in-R, excludes RCall overhead — separate runtimes, not a direct ratio. SCCA 3000×4000+5000: R skipped (27M cells).</p>
+</div>
+</section>
+
+<section id="section-1" class="title-slide slide level1 center" data-background-image="assets/uthsc-building-faded.png" data-background-size="cover" data-background-position="center" data-background-color="#ffffff">
+<h1></h1>
+<div class="thankyou-slide">
+<div class="thankyou-content">
+<p>Thank you for your attention!</p>
+</div>
+</div>
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="talk_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="talk_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="talk_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="talk_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': false,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: true,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'fade',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 5.0e-2,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script type="ojs-module-contents">
+    eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6Im1ldGhvZEluZm8gPSBbXG4gIHtuYW1lOlwiUENBXCIsXG4gICB3aGF0OlwiVGFrZXMgb25lIGRhdGEgbWF0cml4IGFuZCBmaW5kcyB0aGUgZmV3IGRpcmVjdGlvbnMgYWxvbmcgd2hpY2ggdGhlIHNhbXBsZXMgdmFyeSB0aGUgbW9zdCwgdGhlbiByZXdyaXRlcyBlYWNoIHNhbXBsZSB3aXRoIGNvb3JkaW5hdGVzIGFsb25nIHRob3NlIGRpcmVjdGlvbnMgaW5zdGVhZCBvZiB0aGUgb3JpZ2luYWwgdmFyaWFibGVzLlwiLFxuICAgd2h5OlwiVGhlIHdvcmtob3JzZSBmb3IgZGltZW5zaW9uIHJlZHVjdGlvbiBhbmQgdmlzdWFsaXphdGlvbiDigJQgYW5kIHRoZSBidWlsZGluZyBibG9jayB0aGUgb3RoZXJzIGV4dGVuZC5cIn0sXG4gIHtuYW1lOlwiUExTS0VSTlwiLFxuICAgd2hhdDpcIkdpdmVuIHByZWRpY3RvcnMgWCBhbmQgYSByZXNwb25zZSBZIG9uIHRoZSBzYW1lIHNhbXBsZXMsIGl0IGJ1aWxkcyBjb21wb25lbnRzIG9mIFggdGhhdCB2YXJ5IHRvZ2V0aGVyIHdpdGggWSAobWF4aW1pemluZyB0aGVpciBjb3ZhcmlhbmNlKSDigJQgc3VwZXJ2aXNlZCwgdW5saWtlIFBDQS4gVGhlICdrZXJuZWwnIHBhcnQgaXMganVzdCBhIGZhc3RlciByb3V0ZSB0byB0aGUgc2FtZSBmaXQgdmlhIGNyb3NzLXByb2R1Y3QgbWF0cmljZXMuXCIsXG4gICB3aHk6XCJIYW5kbGVzIG1hbnkgY29ycmVsYXRlZCB2YXJpYWJsZXMgKHAg4omrIG4pIHdoZXJlIG9yZGluYXJ5IHJlZ3Jlc3Npb24gZmFpbHM7IHRoZSBrZXJuZWwgZm9ybSBpcyBhIGZhc3Qgcm91dGUgdG8gdGhlIHNhbWUgUExTIGZpdC5cIn0sXG4gIHtuYW1lOlwiQ0NBXCIsXG4gICB3aGF0OlwiVGFrZXMgdHdvIGRhdGEgYmxvY2tzIFggYW5kIFkgbWVhc3VyZWQgb24gdGhlIHNhbWUgc2FtcGxlcyBhbmQgZmluZHMgdGhlIHdlaWdodGVkIGNvbWJpbmF0aW9uIG9mIGVhY2ggd2hvc2UgcmVzdWx0aW5nIHNjb3JlcyBhcmUgYXMgY29ycmVsYXRlZCBhcyBwb3NzaWJsZSDigJQgaS5lLiB0aGUgc3Ryb25nZXN0IHNoYXJlZCBwYXR0ZXJuIGJldHdlZW4gdGhlIHR3byBibG9ja3MuXCIsXG4gICB3aHk6XCJRdWFudGlmaWVzIGhvdyB0d28gc2V0cyBvZiBtZWFzdXJlbWVudHMgb24gdGhlIHNhbWUgc2FtcGxlcyByZWxhdGUg4oCUIHRoZSBjbGFzc2ljIHR3by1ibG9jayB0b29sLlwifSxcbiAge25hbWU6XCJQTURcIixcbiAgIHdoYXQ6XCJBcHByb3hpbWF0ZXMgYSBtYXRyaXggYXMgYSBzdW0gb2YgcmFuay0xIHBpZWNlcyAoc2NvcmUgw5cgbG9hZGluZyksIGJ1dCB3aXRoIHBlbmFsdGllcyB0aGF0IHB1c2ggbW9zdCBsb2FkaW5nIHdlaWdodHMgdG8gZXhhY3RseSB6ZXJvIOKAlCBhIGxvdy1yYW5rIGZhY3Rvcml6YXRpb24gdGhhdCBpcyBhbHNvIHNwYXJzZS5cIixcbiAgIHdoeTpcIlRoZSBlbmdpbmUgYmVoaW5kIHNwYXJzZSBQQ0EvQ0NBIOKAlCBnaXZlcyBpbnRlcnByZXRhYmxlIGZhY3RvcnMgYnkgemVyb2luZyBvdXQgbW9zdCBsb2FkaW5ncy5cIn0sXG4gIHtuYW1lOlwiU1BDXCIsXG4gICB3aGF0OlwiUENBIHdpdGggYSBzcGFyc2l0eSBwZW5hbHR5OiBlYWNoIHByaW5jaXBhbCBjb21wb25lbnQgaXMgc3RpbGwgYSBkaXJlY3Rpb24gb2YgaGlnaCB2YXJpYW5jZSwgYnV0IGl0J3MgYWxsb3dlZCB0byB1c2Ugb25seSBhIHNtYWxsIHN1YnNldCBvZiB2YXJpYWJsZXMgKHRoZSByZXN0IGdldCB3ZWlnaHQgemVybykuXCIsXG4gICB3aHk6XCJLZWVwcyBQQ0EncyBzdHJ1Y3R1cmUgYnV0IHlpZWxkcyBsb2FkaW5ncyB5b3UgY2FuIGFjdHVhbGx5IHJlYWQg4oCUIGEgbmFtZWQgc2hvcnQgbGlzdCBwZXIgY29tcG9uZW50LlwifSxcbiAge25hbWU6XCJTQ0NBXCIsXG4gICB3aGF0OlwiQ0NBIHdpdGggc3BhcnNpdHk6IGl0IGZpbmRzIHRoZSBjb3JyZWxhdGVkIGRpcmVjdGlvbnMgYmV0d2VlbiB0d28gYmxvY2tzIFggYW5kIFosIGJ1dCBmb3JjZXMgZWFjaCBkaXJlY3Rpb24gdG8gcmVseSBvbiBvbmx5IGEgZmV3IHZhcmlhYmxlcyBwZXIgYmxvY2sgaW5zdGVhZCBvZiBhbGwgb2YgdGhlbS5cIixcbiAgIHdoeTpcIkZpbmRzIHdoaWNoIHNwZWNpZmljIHZhcmlhYmxlcyBpbiBlYWNoIGJsb2NrIGRyaXZlIHRoZSBhc3NvY2lhdGlvbiDigJQgZmVhc2libGUgZXZlbiB3aGVuIHAg4omrIG4uXCJ9LFxuICB7bmFtZTpcIkpJVkVcIixcbiAgIHdoYXQ6XCJUYWtlcyBzZXZlcmFsIGRhdGEgdHlwZXMgbWVhc3VyZWQgb24gdGhlIHNhbWUgc2FtcGxlcyBhbmQgZGVjb21wb3NlcyBlYWNoIGludG8gdGhyZWUgcGFydHM6IGEgam9pbnQgc3RydWN0dXJlIHNoYXJlZCBhY3Jvc3MgYWxsIHR5cGVzLCBpbmRpdmlkdWFsIHN0cnVjdHVyZSB1bmlxdWUgdG8gdGhhdCB0eXBlLCBhbmQgcmVzaWR1YWwgbm9pc2UuXCIsXG4gICB3aHk6XCJTZXBhcmF0ZXMgc2lnbmFsIGNvbW1vbiB0byBhbGwgc291cmNlcyBmcm9tIHdoYXQncyB1bmlxdWUgdG8gZWFjaCDigJQgd2hhdCBwbGFpbiBQQ0EvQ0NBIGNhbid0IGRvLlwifSxcbiAgIHtuYW1lOlwiUExTLURBXCIsXG4gICB3aGF0OlwiUExTIHR1cm5lZCBpbnRvIGEgY2xhc3NpZmllcjogdGhlIHJlc3BvbnNlIGlzIHRoZSBjbGFzcyBsYWJlbCAob25lLWhvdCBlbmNvZGVkKSwgc28gaXQgZmluZHMgdGhlIGRpcmVjdGlvbnMgb2YgWCB0aGF0IGJlc3Qgc2VwYXJhdGUgdGhlIGtub3duIGdyb3Vwcy4gVXNlcyBhbGwgdmFyaWFibGVzIOKAlCB0aGUgZGVuc2UgY291bnRlcnBhcnQgb2Ygc1BMUy1EQS5cIixcbiAgIHdoeTpcIlN1cGVydmlzZWQgZ3JvdXAgc2VwYXJhdGlvbiBhbmQgcHJlZGljdGlvbiB3aGVuIHZhcmlhYmxlcyBhcmUgbWFueSBhbmQgY29ycmVsYXRlZCAocCDiiasgbikuXCJ9LFxuICB7bmFtZTpcInNQTFMtREFcIixcbiAgIHdoYXQ6XCJQTFMgdXNlZCBmb3IgY2xhc3NpZmljYXRpb246IHRoZSByZXNwb25zZSBpcyB0aGUgY2xhc3MgbGFiZWwgKG9uZS1ob3QgZW5jb2RlZCksIGFuZCBhIHNwYXJzaXR5IHBlbmFsdHkgbWFrZXMgZWFjaCBjb21wb25lbnQgZGVwZW5kIG9uIG9ubHkgYSBmZXcgdmFyaWFibGVzIOKAlCBzbyBpdCBzZXBhcmF0ZXMgdGhlIGNsYXNzZXMgYW5kIG5hbWVzIHRoZSB2YXJpYWJsZXMgZG9pbmcgaXQuXCIsXG4gICB3aHk6XCJQcmVkaWN0cyB0aGUgY2xhc3MgYW5kIG5hbWVzIHRoZSBmZXcgdmFyaWFibGVzIHJlc3BvbnNpYmxlIOKAlCBpbnRlcnByZXRhYmxlIGJpb21hcmtlciBzZWxlY3Rpb24uXCJ9XG5dXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTIiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJ2aWV3b2YgbWV0aG9kU2VsID0ge1xuICBjb25zdCB3cmFwPWh0bWxgPGRpdiBzdHlsZT1cImRpc3BsYXk6ZmxleDtnYXA6N3B4O2ZsZXgtd3JhcDp3cmFwO21hcmdpbi1ib3R0b206MTRweFwiPjwvZGl2PmA7XG4gIGNvbnN0IGVscz1tZXRob2RJbmZvLm1hcCgoZCxrKT0+eyBjb25zdCBiPWh0bWxgPGJ1dHRvbj4ke2QubmFtZX08L2J1dHRvbj5gO1xuICAgIGIuc3R5bGUuY3NzVGV4dD1cImZvbnQ6NzAwIDEzcHggaW5oZXJpdDtwYWRkaW5nOjZweCAxM3B4O2JvcmRlci1yYWRpdXM6MjBweDtib3JkZXI6MS41cHggc29saWQgI2RkZDtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6IzU1NTtjdXJzb3I6cG9pbnRlclwiO1xuICAgIGIub25jbGljaz0oKT0+e3dyYXAudmFsdWU9aztyZW5kZXIoKTt3cmFwLmRpc3BhdGNoRXZlbnQobmV3IEN1c3RvbUV2ZW50KFwiaW5wdXRcIikpO307IHJldHVybiBiOyB9KTtcbiAgZWxzLmZvckVhY2goZT0+d3JhcC5hcHBlbmQoZSkpO1xuICBjb25zdCByZW5kZXI9KCk9PmVscy5mb3JFYWNoKChiLGspPT57IGNvbnN0IG9uPWs9PT13cmFwLnZhbHVlO1xuICAgIGIuc3R5bGUuYmFja2dyb3VuZD1vbj9cIiNFNzg4MjRcIjpcIiNmZmZcIjsgYi5zdHlsZS5ib3JkZXJDb2xvcj1vbj9cIiNFNzg4MjRcIjpcIiNkZGRcIjsgYi5zdHlsZS5jb2xvcj1vbj9cIiNmZmZcIjpcIiM1NTVcIjsgfSk7XG4gIHdyYXAudmFsdWU9MDsgcmVuZGVyKCk7IHJldHVybiB3cmFwO1xufVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0zIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoibWV0aG9kVmlldyA9IHtcbiAgY29uc3QgZD1tZXRob2RJbmZvW21ldGhvZFNlbF07XG4gIGNvbnN0IE89XCIjRTc4ODI0XCIsT2Q9XCIjQzE0QzIzXCIsRz1cIiM0RDcwMUZcIixpbms9XCIjMmEyYTJhXCIsbXV0PVwiIzc3N1wiO1xuICBjb25zdCBjYXJkPWh0bWxgPGRpdiBzdHlsZT1cImJvcmRlcjoycHggc29saWQgI2VlZTtib3JkZXItdG9wOjVweCBzb2xpZCAke099O2JvcmRlci1yYWRpdXM6MTRweDtwYWRkaW5nOjE4cHggMjRweDtiYWNrZ3JvdW5kOiNmZmY7bWluLWhlaWdodDoxODBweFwiPjwvZGl2PmA7XG4gIGNhcmQuYXBwZW5kKGh0bWxgPGRpdiBzdHlsZT1cImZvbnQ6ODAwIDI0cHggaW5oZXJpdDtjb2xvcjoke09kfTttYXJnaW4tYm90dG9tOjE0cHhcIj4ke2QubmFtZX08L2Rpdj5gKTtcbiAgY29uc3QgYmxvY2s9KGxhYmVsLHRleHQsY29sKT0+e1xuICAgIGNvbnN0IGI9aHRtbGA8ZGl2IHN0eWxlPVwibWFyZ2luLWJvdHRvbToxNHB4XCI+PC9kaXY+YDtcbiAgICBiLmFwcGVuZChodG1sYDxkaXYgc3R5bGU9XCJmb250OjgwMCAxMnB4IGluaGVyaXQ7bGV0dGVyLXNwYWNpbmc6LjA0ZW07Y29sb3I6JHtjb2x9O21hcmdpbi1ib3R0b206M3B4XCI+JHtsYWJlbH08L2Rpdj5gKTtcbiAgICBiLmFwcGVuZChodG1sYDxkaXYgc3R5bGU9XCJmb250OjQwMCAxN3B4IGluaGVyaXQ7bGluZS1oZWlnaHQ6MS40NTtjb2xvcjoke2lua31cIj4ke3RleHR9PC9kaXY+YCk7XG4gICAgcmV0dXJuIGI7XG4gIH07XG4gIGNhcmQuYXBwZW5kKGJsb2NrKFwiV0hBVCBJVCBJU1wiLCBkLndoYXQsIEcpKTtcbiAgY2FyZC5hcHBlbmQoYmxvY2soXCJXSFkgSVQgTUFUVEVSU1wiLCBkLndoeSwgTykpO1xuICByZXR1cm4gY2FyZDtcbn1cbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6Im1ldGhvZHNEaWZmID0ge1xuICBjb25zdCBuYW1lcyA9IFtcIlBDQVwiLFwiUExTS0VSTlwiLFwiQ0NBXCIsXCJQTURcIixcIlNQQ1wiLFwiU0NDQVwiLFwiSklWRVwiLFwiUExTLURBXCIsXCJzUExTLURBXCJdO1xuICAvLyBEW2ldW2pdID0gaG93IHJvdyBpIGRpZmZlcnMgZnJvbSBjb2x1bW4gaiAoc2hvcnQgcGhyYXNlKVxuICBjb25zdCBEID0ge1xuICAgIFwiUENBXCI6ICAgICAge1wiUExTS0VSTlwiOlwibm8gWSDigJQgdW5zdXBlciB2aXNlZFwiLCBcIkNDQVwiOlwib25lIGJsb2NrLCB2YXJpYW5jZSBub3QgY29ycmVsYXRpb25cIiwgXCJQTURcIjpcImRlbnNlLCBubyBzcGFyc2l0eVwiLCBcIlNQQ1wiOlwiZGVuc2UgbG9hZGluZ3NcIiwgXCJTQ0NBXCI6XCJvbmUgYmxvY2ssIGRlbnNlXCIsIFwiSklWRVwiOlwic2luZ2xlIGRhdGEgdHlwZVwiLCBcIlBMUy1EQVwiOlwidW5zdXBlciB2aXNlZCwgbm8gbGFiZWxzXCIsIFwic1BMUy1EQVwiOlwibm8gbGFiZWxzXCJ9LFxuICAgIFwiUExTS0VSTlwiOiAge1wiUENBXCI6XCJ1c2VzIFkgKHN1cGVydmlzZWQpXCIsIFwiQ0NBXCI6XCJtYXggY292YXJpYW5jZSwgbm90IGNvcnJlbGF0aW9uXCIsIFwiUE1EXCI6XCJkZW5zZSwgcmVncmVzc2lvbi1vcmllbnRlZFwiLCBcIlNQQ1wiOlwic3VwZXJ2aXNlZCwgZGVuc2VcIiwgXCJTQ0NBXCI6XCJ0d28tYmxvY2sgYnV0IGRlbnNlXCIsIFwiSklWRVwiOlwib25lIFjigJNZIHBhaXIsIG5vIGpvaW50L2luZGl2XCIsIFwiUExTLURBXCI6XCJyZWdyZXNzaW9uIFksIG5vdCBjbGFzc2VzXCIsIFwic1BMUy1EQVwiOlwicmVncmVzc2lvbiBZLCBub3QgY2xhc3Nlcy9zcGFyc2VcIn0sXG4gICAgXCJDQ0FcIjogICAgICB7XCJQQ0FcIjpcInR3byBibG9ja3MsIGNvcnJlbGF0aW9uXCIsIFwiUExTS0VSTlwiOlwiY29ycmVsYXRpb24sIG5vdCBjb3ZhcmlhbmNlXCIsIFwiUE1EXCI6XCJkZW5zZSwgc3ltbWV0cmljIFjigJNZXCIsIFwiU1BDXCI6XCJ0d28tYmxvY2ssIGRlbnNlXCIsIFwiU0NDQVwiOlwiZGVuc2UgKG5vIHNlbGVjdGlvbilcIiwgXCJKSVZFXCI6XCJzaGFyZWQgb25seSwgbm8gaW5kaXZpZHVhbFwiLCBcIlBMUy1EQVwiOlwidW5zdXBlciB2aXNlZCwgbm90IGNsYXNzaWZpY2F0aW9uXCIsIFwic1BMUy1EQVwiOlwidW5zdXBlcnZpc2VkLCBkZW5zZVwifSxcbiAgICBcIlBNRFwiOiAgICAgIHtcIlBDQVwiOlwiYWRkcyBzcGFyc2l0eSBwZW5hbHR5XCIsIFwiUExTS0VSTlwiOlwibWF0cml4IGZhY3RvcmkgemF0aW9uLCBub3QgcmVncmVzc2lvblwiLCBcIkNDQVwiOlwicGVuYWxpemVkLCBzcGFyc2UgZmFjdG9yc1wiLCBcIlNQQ1wiOlwiZ2VuZXJhbCBlbmdpbmUgKFNQQyBpcyBhIHVzZSBvZiBpdClcIiwgXCJTQ0NBXCI6XCJnZW5lcmFsIGVuZ2luZSAoU0NDQSB1c2VzIGl0KVwiLCBcIkpJVkVcIjpcInNpbmdsZSBtYXRyaXhcIiwgXCJQTFMtREFcIjpcInVuc3VwZXIgdmlzZWQsIG5vIGNsYXNzZXNcIiwgXCJzUExTLURBXCI6XCJ1bnN1cGVydmlzZWQsIG5vIGNsYXNzZXNcIn0sXG4gICAgXCJTUENcIjogICAgICB7XCJQQ0FcIjpcInNwYXJzZSBsb2FkaW5nc1wiLCBcIlBMU0tFUk5cIjpcInVuc3VwZXJ2aXNlZCArIHNwYXJzZVwiLCBcIkNDQVwiOlwib25lIGJsb2NrICsgc3BhcnNlXCIsIFwiUE1EXCI6XCJzcGVjaWZpYyBjYXNlIChzcGFyc2UgUENBKVwiLCBcIlNDQ0FcIjpcIm9uZSBibG9jaywgbm90IHR3b1wiLCBcIkpJVkVcIjpcInNpbmdsZSB0eXBlLCBzcGFyc2VcIiwgXCJQTFMtREFcIjpcInVuc3VwZXIgdmlzZWQsIG5vIGxhYmVsc1wiLCBcInNQTFMtREFcIjpcIm5vIGxhYmVsc1wifSxcbiAgICBcIlNDQ0FcIjogICAgIHtcIlBDQVwiOlwidHdvIGJsb2NrcyArIHNwYXJzZVwiLCBcIlBMU0tFUk5cIjpcImNvcnJlbGF0aW9uICsgc3BhcnNlXCIsIFwiQ0NBXCI6XCJhZGRzIHZhcmlhYmxlIHNlbGVjdGlvblwiLCBcIlBNRFwiOlwic3BlY2lmaWMgY2FzZSAoc3BhcnNlIENDQSlcIiwgXCJTUENcIjpcInR3byBibG9ja3MsIG5vdCBvbmVcIiwgXCJKSVZFXCI6XCJzaGFyZWQgb25seSwgc3BhcnNlXCIsIFwiUExTLURBXCI6XCJ1bnN1cGVydmlzZWQgdHdvLWJsb2NrXCIsIFwic1BMUy1EQVwiOlwidW5zdXBlcnZpc2VkIFjigJNaXCJ9LFxuICAgIFwiSklWRVwiOiAgICAge1wiUENBXCI6XCLiiaUyIHR5cGVzLCBzcGxpdHMgam9pbnQvaW5kaXZcIiwgXCJQTFNLRVJOXCI6XCLiiaUyIHR5cGVzLCBubyByZXNwb25zZVwiLCBcIkNDQVwiOlwiYWRkcyBpbmRpdmlkdWFsIHN0cnVjdHVyZVwiLCBcIlBNRFwiOlwibXVsdGktdHlwZSBkZWNvbSBwb3NpdGlvblwiLCBcIlNQQ1wiOlwibXVsdGktdHlwZSwgbm90IHNwYXJzZVwiLCBcIlNDQ0FcIjpcImpvaW50ICsgaW5kaXZpZHVhbCAobm90IGp1c3Qgc2hhcmVkKVwiLCBcIlBMUy1EQVwiOlwidW5zdXBlciB2aXNlZCBpbnRlZ3JhdGlvblwiLCBcInNQTFMtREFcIjpcInVuc3VwZXJ2aXNlZCBpbnRlZ3JhdGlvblwifSxcbiAgICBcIlBMUy1EQVwiOiAgIHtcIlBDQVwiOlwic3VwZXJ2aXNlZCDigJQgdXNlcyBjbGFzcyBsYWJlbHNcIiwgXCJQTFNLRVJOXCI6XCJjbGFzc2lmaWVzIChjbGFzcyBZKSwgbm90IHJlZ3Jlc3Npb25cIiwgXCJDQ0FcIjpcInN1cGVydmlzZWQgY2xhc3NpIGZpY2F0aW9uXCIsIFwiUE1EXCI6XCJzdXBlcnZpc2VkLCB1c2VzIGNsYXNzZXNcIiwgXCJTUENcIjpcInN1cGVydmlzZWQsIHVzZXMgY2xhc3Nlc1wiLCBcIlNDQ0FcIjpcImNsYXNzaWZ5LCBub3QgY29ycmVsYXRlXCIsIFwiSklWRVwiOlwiY2xhc3NpZmljYXRpb24sIHNpbmdsZSBYXCIsIFwic1BMUy1EQVwiOlwiZGVuc2Ug4oCUIHVzZXMgYWxsIHZhcmlhYmxlc1wifSxcbiAgICBcInNQTFMtREFcIjogIHtcIlBDQVwiOlwic3VwZXJ2aXNlZCBjbGFzc2kgZmljYXRpb25cIiwgXCJQTFNLRVJOXCI6XCJjbGFzcyBsYWJlbHMgKyBzcGFyc2VcIiwgXCJDQ0FcIjpcImNsYXNzaWZ5LCBub3QgY29ycmVsYXRlXCIsIFwiUE1EXCI6XCJzdXBlcnZpc2VkLCBjbGFzc2VzXCIsIFwiU1BDXCI6XCJzdXBlcnZpc2VkICsgc2VsZWN0aW9uXCIsIFwiU0NDQVwiOlwiWSA9IGNsYXNzIGluZGljYXRvclwiLCBcIkpJVkVcIjpcImNsYXNzaSBmaWNhdGlvbiwgb25lIFhcIiwgXCJQTFMtREFcIjpcImFkZHMgc3BhcnNpdHkgKHZhcmlhYmxlIHNlbGVjdGlvbilcIn1cbiAgfTtcbiAgY29uc3QgTz1cIiNFNzg4MjRcIixPZD1cIiNDMTRDMjNcIixHPVwiIzRENzAxRlwiLGluaz1cIiMyYTJhMmFcIixtdXQ9XCIjNTU1XCI7XG4gIGNvbnN0IGJveD1odG1sYDxkaXYgc3R5bGU9XCJvdmVyZmxvdzphdXRvO21heC1oZWlnaHQ6NTYwcHhcIj48L2Rpdj5gO1xuICBjb25zdCB0Ymw9aHRtbGA8dGFibGUgc3R5bGU9XCJib3JkZXItY29sbGFwc2U6Y29sbGFwc2U7Zm9udC1mYW1pbHk6aW5oZXJpdDtmb250LXNpemU6MTBweDt0YWJsZS1sYXlvdXQ6Zml4ZWQ7d2lkdGg6MTAwJVwiPjwvdGFibGU+YDtcbiAgY29uc3QgaHI9aHRtbGA8dHI+PC90cj5gO1xuICBoci5hcHBlbmQoaHRtbGA8dGggc3R5bGU9XCJwb3NpdGlvbjpzdGlja3k7bGVmdDowO3RvcDowO3otaW5kZXg6MztiYWNrZ3JvdW5kOiNmZmY7d2lkdGg6NjJweFwiPjwvdGg+YCk7XG4gIG5hbWVzLmZvckVhY2gobj0+e1xuICAgIGNvbnN0IHRoPWh0bWxgPHRoPiR7bn08L3RoPmA7XG4gICAgdGguc3R5bGUuY3NzVGV4dD1gcG9zaXRpb246c3RpY2t5O3RvcDowO3otaW5kZXg6MjtiYWNrZ3JvdW5kOiNmZmY7cGFkZGluZzo0cHggM3B4O2ZvbnQtc2l6ZToxMC41cHg7Zm9udC13ZWlnaHQ6ODAwO2NvbG9yOiR7T2R9O2JvcmRlci1ib3R0b206MnB4IHNvbGlkICR7T31gO1xuICAgIGhyLmFwcGVuZCh0aCk7XG4gIH0pO1xuICB0YmwuYXBwZW5kKGhyKTtcbiAgbmFtZXMuZm9yRWFjaCgocmkpPT57XG4gICAgY29uc3QgdHI9aHRtbGA8dHI+PC90cj5gO1xuICAgIGNvbnN0IHJoPWh0bWxgPHRoPiR7cml9PC90aD5gO1xuICAgIHJoLnN0eWxlLmNzc1RleHQ9YHBvc2l0aW9uOnN0aWNreTtsZWZ0OjA7YmFja2dyb3VuZDojZmZmO3otaW5kZXg6MTtwYWRkaW5nOjRweCA1cHg7dGV4dC1hbGlnbjpyaWdodDtmb250LXNpemU6MTAuNXB4O2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjoke09kfTtib3JkZXItcmlnaHQ6MnB4IHNvbGlkICR7T31gO1xuICAgIHRyLmFwcGVuZChyaCk7XG4gICAgbmFtZXMuZm9yRWFjaCgoY2kpPT57XG4gICAgICBpZihyaT09PWNpKXtcbiAgICAgICAgY29uc3QgdGQ9aHRtbGA8dGQ+JHtyaX08L3RkPmA7XG4gICAgICAgIHRkLnN0eWxlLmNzc1RleHQ9YGJhY2tncm91bmQ6I2ZmZjJlNjtjb2xvcjoke0d9O2ZvbnQtd2VpZ2h0OjgwMDt0ZXh0LWFsaWduOmNlbnRlcjtwYWRkaW5nOjRweDtib3JkZXI6MXB4IHNvbGlkICNmMGU2ZDg7Zm9udC1zaXplOjEwcHhgO1xuICAgICAgICB0ci5hcHBlbmQodGQpO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QgdGQ9aHRtbGA8dGQ+JHtEW3JpXVtjaV19PC90ZD5gO1xuICAgICAgICB0ZC5zdHlsZS5jc3NUZXh0PWBwYWRkaW5nOjRweCA1cHg7Ym9yZGVyOjFweCBzb2xpZCAjZWVlO2NvbG9yOiR7aW5rfTtsaW5lLWhlaWdodDoxLjI1O3ZlcnRpY2FsLWFsaWduOnRvcGA7XG4gICAgICAgIHRyLmFwcGVuZCh0ZCk7XG4gICAgICB9XG4gICAgfSk7XG4gICAgdGJsLmFwcGVuZCh0cik7XG4gIH0pO1xuICBib3guYXBwZW5kKHRibCk7XG4gIHJldHVybiBib3g7XG59XG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTUiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJiZW5jaEFsbCA9IHtcbiAgLy8gcmp1bGlhPXRydWUg4oaSIHJlZmVyZW5jZSBpcyBhIEp1bGlhIHBrZyAoaGFzIHRpbWUrYWxsb2NzK21lbSk7IGZhbHNlIOKGkiBSICh0aW1lIG9ubHkpLlxuICAvLyByb3dzOiBbc2l6ZSwgbWF0Y2gsIGpUaW1lLCBqQWxsb2MsIGpNZW0sIHJlZlRpbWUsIHJlZkFsbG9jLCByZWZNZW0sIHJlcHNdXG4gIHJldHVybiB7XG4gICAgUENBOiB7cmVmOlwiTXVsdGl2YXJpYXRlU3RhdHMuUENBIChKdWxpYSlcIiwgcmp1bGlhOnRydWUsXG4gICAgICByb3dzOltcbiAgICAgICAgW1wiMjAww5c0MCwgaz02XCIsXCIyLjJlLTE2XCIsXCIxMjcgwrVzXCIsXCI0MVwiLFwiNTYuNiBLaUJcIixcIjE1MSDCtXNcIixcIjQxXCIsXCIxMjEgS2lCXCIsXCJcIl0sXG4gICAgICAgIFtcIjEwMDDDlzEwMCwgaz0xMFwiLFwiMy4zZS0xNlwiLFwiNzIzIMK1c1wiLFwiNDJcIixcIjMzNiBLaUJcIixcIjEuMTYgbXNcIixcIjQyXCIsXCIxLjExIE1pQlwiLFwiXCJdLFxuICAgICAgICBbXCI1MDAww5cyMDAsIGs9MjBcIixcIjQuNGUtMTZcIixcIjQuMjQgbXNcIixcIjQzXCIsXCIxLjA2IE1pQlwiLFwiNi41MCBtc1wiLFwiNDNcIixcIjguNzEgTWlCXCIsXCJcIl0sXG4gICAgICAgIFtcIjIwMMOXNTAwLCBrPTIwXCIsXCI4LjllLTE2XCIsXCI5LjY5IG1zXCIsXCI0MlwiLFwiNC4wMiBNaUJcIixcIjkuNjYgbXNcIixcIjM5XCIsXCI0LjAyIE1pQlwiLFwiXCJdLFxuICAgICAgICBbXCIyMDAww5cxMDAwLCBrPTMwXCIsXCIxLjhlLTE1XCIsXCI3OC43IG1zXCIsXCI0NlwiLFwiMjMuNiBNaUJcIixcIjE1NyBtc1wiLFwiNDZcIixcIjM4LjkgTWlCXCIsXCJcIl0sXG4gICAgICAgIFtcIjEwMDAww5c1MDAwLCBrPTUwXCIsXCIzLjFlLTE1XCIsXCIxMC43MSBzXCIsXCI0NlwiLFwiNTc2IE1pQlwiLFwiMTguNDAgc1wiLFwiNDZcIixcIjk1OCBNaUJcIixcIlwiXV19LFxuICAgIFBMU0tFUk46IHtyZWY6XCJKY2hlbW8ucGxza2VybiAoSnVsaWEpXCIsIHJqdWxpYTp0cnVlLFxuICAgICAgcm93czpbXG4gICAgICAgIFtcIjIwMMOXMzAsIG5sdj04XCIsXCIxLjFlLTE2XCIsXCIyMC45IMK1c1wiLFwiNDVcIixcIjIzLjMgS2lCXCIsXCI5OC4xIMK1c1wiLFwiNDk4XCIsXCIxMTEgS2lCXCIsXCJcIl0sXG4gICAgICAgIFtcIjEwMDDDlzUwLCBubHY9MTJcIixcIjUuNmUtMTdcIixcIjI1MiDCtXNcIixcIjQ5XCIsXCIxMjMgS2lCXCIsXCI0MDUgwrVzXCIsXCI4NDNcIixcIjYwMyBLaUJcIixcIlwiXSxcbiAgICAgICAgW1wiNTAwMMOXMTAwLCBubHY9MjBcIixcIjguM2UtMTdcIixcIjEuNTQgbXNcIixcIjQ5XCIsXCI5MTkgS2lCXCIsXCIyLjU2IG1zXCIsXCIxODAzXCIsXCI1LjA2IE1pQlwiLFwiXCJdLFxuICAgICAgICBbXCI0MDDDlzMwMCwgbmx2PTMwXCIsXCI1LjBlLTE2XCIsXCIxLjQ1IG1zXCIsXCI1NVwiLFwiNDA1IEtpQlwiLFwiMS44MiBtc1wiLFwiMzU0OVwiLFwiMS40OSBNaUJcIixcIlwiXSxcbiAgICAgICAgW1wiMjAwMMOXNTAwLCBubHY9MjVcIixcIjEuMWUtMTZcIixcIjMuNzEgbXNcIixcIjU1XCIsXCI4NDIgS2lCXCIsXCI1Ljc0IG1zXCIsXCIyNjA1XCIsXCI4LjY1IE1pQlwiLFwiXCJdLFxuICAgICAgICBbXCIxMDAwMMOXMjAwMCwgbmx2PTQwXCIsXCIxLjBlLTE2XCIsXCIyOTUgbXNcIixcIjU1XCIsXCI1LjEzIE1pQlwiLFwiMzQzIG1zXCIsXCI1ODkyXCIsXCIxNTggTWlCXCIsXCJcIl1dfSxcbiAgICBDQ0E6IHtyZWY6XCJNdWx0aXZhcmlhdGVTdGF0cy5DQ0EgKEp1bGlhKVwiLCByanVsaWE6dHJ1ZSxcbiAgICAgIHJvd3M6W1xuICAgICAgICBbXCI2w5c1LCBuPTMwMFwiLFwiNi4yZS0xNlwiLFwiODkuNyDCtXNcIixcIjc1XCIsXCI2OC4yIEtpQlwiLFwiOTMuNCDCtXNcIixcIjkzXCIsXCIxMjAgS2lCXCIsXCJcIl0sXG4gICAgICAgIFtcIjIww5cxNSwgbj0xMDAwXCIsXCIxLjVlLTE1XCIsXCIxLjE1IG1zXCIsXCI3OVwiLFwiNjM0IEtpQlwiLFwiMS4yMCBtc1wiLFwiOThcIixcIjEuMTUgTWlCXCIsXCJcIl0sXG4gICAgICAgIFtcIjUww5c0MCwgbj01MDAwXCIsXCIxLjJlLTE1XCIsXCIxNC4yIG1zXCIsXCI4NVwiLFwiNy4yNyBNaUJcIixcIjE0LjUgbXNcIixcIjEwNVwiLFwiMTMuOCBNaUJcIixcIlwiXSxcbiAgICAgICAgW1wiMTAww5c4MCwgbj0yMDAwXCIsXCIzLjJlLTE1XCIsXCIxNy45IG1zXCIsXCI4NVwiLFwiNi43NCBNaUJcIixcIjE4LjUgbXNcIixcIjEwNVwiLFwiMTIuMiBNaUJcIixcIlwiXSxcbiAgICAgICAgW1wiMjAww5cxNTAsIG49MzAwMFwiLFwiMi42ZS0xNVwiLFwiODcuNyBtc1wiLFwiODVcIixcIjIwLjIgTWlCXCIsXCI5OS42IG1zXCIsXCIxMDVcIixcIjM1LjYgTWlCXCIsXCJcIl0sXG4gICAgICAgIFtcIjUwMMOXNDAwLCBuPTEwMDAwXCIsXCIzLjVlLTE1XCIsXCIxLjMyIHNcIixcIjk1XCIsXCIxNjcgTWlCXCIsXCIxLjQ0IHNcIixcIjExNlwiLFwiMzAxIE1pQlwiLFwiXCJdXX0sXG4gICAgUE1EOiB7cmVmOlwiUE1BOjpQTUQgKFIpXCIsIHJqdWxpYTpmYWxzZSxcbiAgICAgIHJvd3M6W1xuICAgICAgICBbXCI2MMOXNDBcIixcIjEuMWUtMTZcIixcIjMxMiDCtXNcIixcIjQ0XCIsXCIxNjEgS2lCXCIsXCIxNC40IG1zXCIsXCJcIixcIlwiLFwiMjBcIl0sXG4gICAgICAgIFtcIjIwMMOXMTUwXCIsXCIzLjNlLTE2XCIsXCI0LjUyIG1zXCIsXCI0N1wiLFwiMS44MSBNaUJcIixcIjM2LjQgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMTAwMMOXNTAwXCIsXCIyLjJlLTE2XCIsXCI4MC4xIG1zXCIsXCI1M1wiLFwiMjEuMyBNaUJcIixcIjU4MyBtc1wiLFwiXCIsXCJcIixcIjNcIl0sXG4gICAgICAgIFtcIjMwMMOXODAwXCIsXCIxLjFlLTE2XCIsXCIyNy4xIG1zXCIsXCI2NVwiLFwiOC42NSBNaUJcIixcIjE3MCBtc1wiLFwiXCIsXCJcIixcIjIwXCJdLFxuICAgICAgICBbXCIyMDAww5cxMDAwXCIsXCIxLjFlLTE2XCIsXCI0MjUgbXNcIixcIjUzXCIsXCI5MS45IE1pQlwiLFwiMy40NyBzXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiNTAwMMOXMzAwMFwiLFwiOC45ZS0xNlwiLFwiOS44OSBzXCIsXCI1M1wiLFwiNzEwIE1pQlwiLFwiODAuMCBzXCIsXCJcIixcIlwiLFwiM1wiXV19LFxuICAgIFNQQzoge3JlZjpcIlBNQTo6U1BDIChSKVwiLCByanVsaWE6ZmFsc2UsXG4gICAgICByb3dzOltcbiAgICAgICAgW1wiODDDlzMwXCIsXCIxLjFlLTEzIOKck3NldHNcIixcIjIxNCDCtXNcIixcIjk5XCIsXCI4Mi4xIEtpQlwiLFwiOC43NiBtc1wiLFwiXCIsXCJcIixcIjIwXCJdLFxuICAgICAgICBbXCIzMDDDlzEwMFwiLFwiMi40ZS0xNCDinJNzZXRzXCIsXCIxLjU0IG1zXCIsXCIxMDRcIixcIjg2NCBLaUJcIixcIjQyLjAgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMTAwMMOXNDAwXCIsXCIxLjBlLTE0IOKck3NldHNcIixcIjE3LjggbXNcIixcIjExM1wiLFwiMTAuMSBNaUJcIixcIjEuODkgc1wiLFwiXCIsXCJcIixcIjNcIl0sXG4gICAgICAgIFtcIjIwMMOXNjAwXCIsXCIyLjVlLTE0IOKck3NldHNcIixcIjYuMTAgbXNcIixcIjExM1wiLFwiMi45NyBNaUJcIixcIjI1MiBtc1wiLFwiXCIsXCJcIixcIjIwXCJdLFxuICAgICAgICBbXCIyMDAww5c4MDBcIixcIjguOWUtMTUg4pyTc2V0c1wiLFwiNjkuMCBtc1wiLFwiMTEzXCIsXCIzOS42IE1pQlwiLFwiMTQuOSBzXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiNTAwMMOXMzAwMFwiLFwiMi4zZS0xNCDinJNzZXRzXCIsXCIzLjA3IHNcIixcIjExM1wiLFwiNDM3IE1pQlwiLFwiNTAyLjUgc1wiLFwiXCIsXCJcIixcIjNcIl1dfSxcbiAgICBTQ0NBOiB7cmVmOlwiUE1BOjpDQ0EgKFIpXCIsIHJqdWxpYTpmYWxzZSxcbiAgICAgIHJvd3M6W1xuICAgICAgICBbXCIxMDDDlzQwKzUwXCIsXCIwLjAg4pyTc2V0c1wiLFwiMzM4IMK1c1wiLFwiMTIwXCIsXCI0MzIgS2lCXCIsXCI4LjkwIG1zXCIsXCJcIixcIlwiLFwiMjBcIl0sXG4gICAgICAgIFtcIjMwMMOXMTUwKzIwMFwiLFwiMi4yZS0xNiDinJNzZXRzXCIsXCI1Ljk1IG1zXCIsXCIxMjlcIixcIjQuMDAgTWlCXCIsXCIzOC41IG1zXCIsXCJcIixcIlwiLFwiMjBcIl0sXG4gICAgICAgIFtcIjUwMMOXODAwKzEwMDBcIixcIjAuMCDinJNzZXRzXCIsXCIxNDggbXNcIixcIjE3N1wiLFwiNTIuMCBNaUJcIixcIjIuMTMgc1wiLFwiXCIsXCJcIixcIjNcIl0sXG4gICAgICAgIFtcIjEwMDDDlzUwMCs2MDBcIixcIjIuMmUtMTYg4pyTc2V0c1wiLFwiODcuNSBtc1wiLFwiMTQ1XCIsXCI0MC4xIE1pQlwiLFwiNjA2IG1zXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiMjAwMMOXMTUwMCsyMDAwXCIsXCIyLjJlLTE2IOKck3NldHNcIixcIjIuMjggc1wiLFwiMTQ1XCIsXCIzMDEgTWlCXCIsXCIxMy4wIHNcIixcIlwiLFwiXCIsXCIzXCJdLFxuICAgICAgICBbXCIzMDAww5c0MDAwKzUwMDBcIixcIjQuNGUtMTYg4pyTc2V0c1wiLFwiMjEuNDggc1wiLFwiMTc3XCIsXCIxLjU3IEdpQlwiLFwi4oCUIHNraXBwZWRcIixcIlwiLFwiXCIsXCJcIl1dfSxcbiAgICBKSVZFOiB7cmVmOlwici5qaXZlIChSKVwiLCByanVsaWE6ZmFsc2UsXG4gICAgICByb3dzOltcbiAgICAgICAgW1wiODDDlzYwKzUwXCIsXCIyLjBlLTlcIixcIjM2LjQgbXNcIixcIjEzNTlcIixcIjE3LjkgTWlCXCIsXCIyLjMzIHNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMjAww5cxNTArMTIwXCIsXCI5LjZlLTlcIixcIjQyNyBtc1wiLFwiMTUxNVwiLFwiOTYuOCBNaUJcIixcIjIuOTAgc1wiLFwiXCIsXCJcIixcIjIwXCJdLFxuICAgICAgICBbXCI1MDDDlzQwMCszMDBcIixcIjEuMWUtN1wiLFwiMy45OSBzXCIsXCIxNDEwXCIsXCI1MzAgTWlCXCIsXCIxMC41IHNcIixcIlwiLFwiXCIsXCIzXCJdLFxuICAgICAgICBbXCIzMDDDlzgwMCs3MDBcIixcIjkuNmUtOFwiLFwiMS44NyBzXCIsXCIxNTg0XCIsXCIzNjIgTWlCXCIsXCI2Ljc2IHNcIixcIlwiLFwiXCIsXCIzXCJdLFxuICAgICAgICBbXCIxMDAww5cxMDAwKzgwMFwiLFwiOC41ZS03XCIsXCIzNC43IHNcIixcIjE1OTBcIixcIjMuNDcgR2lCXCIsXCIxMTUuNiBzXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiMjAwMMOXMzAwMCsyNTAwXCIsXCIzLjBlLTZcIixcIjI0NS4zIHNcIixcIjE1ODRcIixcIjE1LjQgR2lCXCIsXCIxMDIzLjQgc1wiLFwiXCIsXCJcIixcIjNcIl1dfSxcbiAgICBQTFNEQToge3JlZjpcIm1peE9taWNzOjpwbHNkYSAoUilcIiwgcmp1bGlhOmZhbHNlLFxuICAgICAgcm93czpbXG4gICAgICAgIFtcIjYww5cyMDAsIG5jb21wPTJcIixcIjIuMmUtMTZcIixcIjcxLjAgwrVzXCIsXCIxNjhcIixcIjQ0NiBLaUJcIixcIjIuMDAgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMTUww5c1MDAsIG5jb21wPTJcIixcIjMuM2UtMTZcIixcIjM2NSDCtXNcIixcIjE4M1wiLFwiMi41MSBNaUJcIixcIjQuNzkgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiNjAww5cxMDAwLCBuY29tcD0zXCIsXCIzLjNlLTE2XCIsXCIyLjcwIG1zXCIsXCIxOTlcIixcIjE4LjcgTWlCXCIsXCI1MC41IG1zXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiOTDDlzE1MDAsIG5jb21wPTJcIixcIjEuOWUtMTVcIixcIjY2NSDCtXNcIixcIjE4MVwiLFwiNC41OSBNaUJcIixcIjcuODAgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMzAww5cyMDAwLCBuY29tcD0zXCIsXCIxLjFlLTE2XCIsXCIzLjQyIG1zXCIsXCIxOTlcIixcIjE5LjEgTWlCXCIsXCI0Ni43IG1zXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiOTAww5c1MDAwLCBuY29tcD0zXCIsXCI0LjRlLTE2XCIsXCI0NC45IG1zXCIsXCIxOTlcIixcIjEzOSBNaUJcIixcIjMxNyBtc1wiLFwiXCIsXCJcIixcIjNcIl1dfSwgICAgXG4gICAgU1BMU0RBOiB7cmVmOlwibWl4T21pY3M6OnNwbHNkYSAoUilcIiwgcmp1bGlhOmZhbHNlLFxuICAgICAgcm93czpbXG4gICAgICAgIFtcIjYww5cyMDAsIGtlZXBYPTEwXCIsXCIwLjAg4pyTc2V0c1wiLFwiMTA2IMK1c1wiLFwiMTg0XCIsXCI0NjEgS2lCXCIsXCIyLjg1IG1zXCIsXCJcIixcIlwiLFwiMjBcIl0sXG4gICAgICAgIFtcIjE1MMOXNTAwLCBrZWVwWD0yMFwiLFwiMS4xZS0xNiDinJNzZXRzXCIsXCI1MzYgwrVzXCIsXCIyMDhcIixcIjIuNTUgTWlCXCIsXCI2LjU0IG1zXCIsXCJcIixcIlwiLFwiMjBcIl0sXG4gICAgICAgIFtcIjYwMMOXMTAwMCwga2VlcFg9MzBcIixcIjIuMmUtMTYg4pyTc2V0c1wiLFwiMi43MiBtc1wiLFwiMjA0XCIsXCIxOC43IE1pQlwiLFwiNDAuMyBtc1wiLFwiXCIsXCJcIixcIjNcIl0sXG4gICAgICAgIFtcIjkww5cxNTAwLCBrZWVwWD0xNVwiLFwiMC4wIOKck3NldHNcIixcIjk5OSDCtXNcIixcIjIwM1wiLFwiNC42OSBNaUJcIixcIjkuNjIgbXNcIixcIlwiLFwiXCIsXCIyMFwiXSxcbiAgICAgICAgW1wiMzAww5cyMDAwLCBrZWVwWD00MFwiLFwiMi4yZS0xNiDinJNzZXRzXCIsXCIzLjg5IG1zXCIsXCIyMTBcIixcIjE5LjEgTWlCXCIsXCI0MC42IG1zXCIsXCJcIixcIlwiLFwiM1wiXSxcbiAgICAgICAgW1wiOTAww5c1MDAwLCBrZWVwWD01MFwiLFwiMS4xZS0xNiDinJNzZXRzXCIsXCIzNS43IG1zXCIsXCIyMDRcIixcIjEzOSBNaUJcIixcIjI1OSBtc1wiLFwiXCIsXCJcIixcIjNcIl1dfVxuICB9O1xufVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC02IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGJlbmNoUGljayA9IHtcbiAgY29uc3QgbmFtZXMgPSBPYmplY3Qua2V5cyhiZW5jaEFsbCk7XG4gIGNvbnN0IHdyYXA9aHRtbGA8ZGl2IHN0eWxlPVwiZGlzcGxheTpmbGV4O2dhcDo2cHg7ZmxleC13cmFwOndyYXA7bWFyZ2luLWJvdHRvbToxMnB4XCI+PC9kaXY+YDtcbiAgY29uc3QgZWxzPW5hbWVzLm1hcCgobm0pPT57IGNvbnN0IGI9aHRtbGA8YnV0dG9uPiR7bm19PC9idXR0b24+YDtcbiAgICBiLnN0eWxlLmNzc1RleHQ9XCJmb250OjcwMCAxMi41cHggaW5oZXJpdDtwYWRkaW5nOjVweCAxMnB4O2JvcmRlci1yYWRpdXM6MjBweDtib3JkZXI6MS41cHggc29saWQgI2RkZDtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6IzU1NTtjdXJzb3I6cG9pbnRlclwiO1xuICAgIGIub25jbGljaz0oKT0+e3dyYXAudmFsdWU9bm07cmVuZGVyKCk7d3JhcC5kaXNwYXRjaEV2ZW50KG5ldyBDdXN0b21FdmVudChcImlucHV0XCIpKTt9OyByZXR1cm4gYjsgfSk7XG4gIGVscy5mb3JFYWNoKGU9PndyYXAuYXBwZW5kKGUpKTtcbiAgY29uc3QgcmVuZGVyPSgpPT5lbHMuZm9yRWFjaCgoYixrKT0+eyBjb25zdCBvbj1uYW1lc1trXT09PXdyYXAudmFsdWU7XG4gICAgYi5zdHlsZS5iYWNrZ3JvdW5kPW9uP1wiI0U3ODgyNFwiOlwiI2ZmZlwiOyBiLnN0eWxlLmJvcmRlckNvbG9yPW9uP1wiI0U3ODgyNFwiOlwiI2RkZFwiOyBiLnN0eWxlLmNvbG9yPW9uP1wiI2ZmZlwiOlwiIzU1NVwiOyB9KTtcbiAgd3JhcC52YWx1ZT1uYW1lc1swXTsgcmVuZGVyKCk7IHJldHVybiB3cmFwO1xufVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC03IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiYmVuY2hUYWJsZSA9IHtcbiAgY29uc3QgZD1iZW5jaEFsbFtiZW5jaFBpY2tdO1xuICBjb25zdCBPPVwiI0U3ODgyNFwiLE9kPVwiI0MxNEMyM1wiLEc9XCIjNEQ3MDFGXCIsaW5rPVwiIzJhMmEyYVwiLG11dD1cIiM3NzdcIjtcbiAgY29uc3QgYm94PWh0bWxgPGRpdj48L2Rpdj5gO1xuICBib3guYXBwZW5kKGh0bWxgPGRpdiBzdHlsZT1cImZvbnQ6NzAwIDEzcHggaW5oZXJpdDtjb2xvcjoke211dH07bWFyZ2luLWJvdHRvbTo4cHhcIj4ke2JlbmNoUGlja30gJm5ic3A7wrcmbmJzcDsgcmVmZXJlbmNlOiA8c3BhbiBzdHlsZT1cImNvbG9yOiR7aW5rfVwiPiR7ZC5yZWZ9PC9zcGFuPiAmbmJzcDvCtyZuYnNwOyA8c3BhbiBzdHlsZT1cImNvbG9yOiR7R307Zm9udC13ZWlnaHQ6ODAwXCI+YWxsIHNpemVzIElERU5USUNBTCDinJM8L3NwYW4+PC9kaXY+YCk7XG5cbiAgY29uc3QgaGVhZCA9IGQucmp1bGlhXG4gICAgPyBbXCJTaXplXCIsXCJNYXRjaFwiLFwiSnVsaWEgdGltZVwiLFwiSiBhbGxvY1wiLFwiSiBtZW1cIixcIlJlZiB0aW1lXCIsXCJSZWYgYWxsb2NcIixcIlJlZiBtZW1cIl1cbiAgICA6IFtcIlNpemVcIixcIk1hdGNoXCIsXCJKdWxpYSB0aW1lXCIsXCJKIGFsbG9jXCIsXCJKIG1lbVwiLFwiUmVmIHRpbWUgKFIpXCIsXCJSIHJlcHNcIl07XG5cbiAgY29uc3QgdGJsPWh0bWxgPHRhYmxlIHN0eWxlPVwiYm9yZGVyLWNvbGxhcHNlOmNvbGxhcHNlO3dpZHRoOjEwMCU7Zm9udC1zaXplOjEyLjVweDtmb250LWZhbWlseTppbmhlcml0XCI+PC90YWJsZT5gO1xuICBjb25zdCBocj1odG1sYDx0cj48L3RyPmA7XG4gIGhlYWQuZm9yRWFjaCgoaCxpKT0+eyBjb25zdCB0aD1odG1sYDx0aD4ke2h9PC90aD5gO1xuICAgIHRoLnN0eWxlLmNzc1RleHQ9YHRleHQtYWxpZ246JHtpPT09MD8nbGVmdCc6J2NlbnRlcid9O3BhZGRpbmc6NXB4IDdweDtib3JkZXItYm90dG9tOjJweCBzb2xpZCAke099O2NvbG9yOiR7aW5rfTtmb250LXdlaWdodDo4MDA7Zm9udC1zaXplOjExLjVweGA7XG4gICAgaHIuYXBwZW5kKHRoKTsgfSk7XG4gIHRibC5hcHBlbmQoaHIpO1xuXG4gIGQucm93cy5mb3JFYWNoKChyLHJpKT0+e1xuICAgIGNvbnN0IGNlbGxzID0gZC5yanVsaWFcbiAgICAgID8gW3JbMF0sclsxXSxyWzJdLHJbM10scls0XSxyWzVdLHJbNl0scls3XV0gICAvLyBzaXplLG1hdGNoLGp0LGphLGptLHJ0LHJhLHJtXG4gICAgICA6IFtyWzBdLHJbMV0sclsyXSxyWzNdLHJbNF0scls1XSxyWzhdXTsgICAgICAgIC8vIHNpemUsbWF0Y2gsanQsamEsam0scnQscmVwc1xuICAgIGNvbnN0IHJlZlRpbWVJZHggPSA1O1xuICAgIGNvbnN0IHRyPWh0bWxgPHRyPjwvdHI+YDsgdHIuc3R5bGUuYmFja2dyb3VuZD0gcmklMiA/IFwiI2ZhZjhmNVwiOlwiI2ZmZlwiO1xuICAgIGNlbGxzLmZvckVhY2goKGMsY2kpPT57XG4gICAgICBjb25zdCB0ZD1odG1sYDx0ZD4ke2N9PC90ZD5gO1xuICAgICAgbGV0IGNzcz1gcGFkZGluZzo0cHggN3B4O3RleHQtYWxpZ246JHtjaT09PTA/J2xlZnQnOidjZW50ZXInfTtib3JkZXItYm90dG9tOjFweCBzb2xpZCAjZWVlO2A7XG4gICAgICBpZihjaT09PTApIGNzcys9YGZvbnQtd2VpZ2h0OjcwMDtjb2xvcjoke2lua307YDtcbiAgICAgIGVsc2UgaWYoY2k9PT0xKSBjc3MrPWBmb250LWZhbWlseTp1aS1tb25vc3BhY2UsTWVubG8sbW9ub3NwYWNlO2ZvbnQtc2l6ZToxMXB4O2NvbG9yOiR7R307YDtcbiAgICAgIGVsc2UgaWYoY2k9PT0yKSBjc3MrPWBmb250LXdlaWdodDo4MDA7Y29sb3I6JHtHfTtgO1xuICAgICAgZWxzZSBpZihjaT09PXJlZlRpbWVJZHgpIGNzcys9YGNvbG9yOiR7T2R9O2ZvbnQtd2VpZ2h0OjcwMDtgO1xuICAgICAgZWxzZSBjc3MrPWBjb2xvcjoke211dH07Zm9udC1zaXplOjExLjVweDtgO1xuICAgICAgdGQuc3R5bGUuY3NzVGV4dD1jc3M7XG4gICAgICB0ci5hcHBlbmQodGQpO1xuICAgIH0pO1xuICAgIHRibC5hcHBlbmQodHIpO1xuICB9KTtcbiAgYm94LmFwcGVuZCh0YmwpO1xuICByZXR1cm4gYm94O1xufVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdtZXRob2RTZWwnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnYmVuY2hQaWNrJykifV19
+    </script>
+    <script type="module">
+    if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+    window._ojs.paths.runtimeToDoc = "../../..";
+    window._ojs.paths.runtimeToRoot = "../../..";
+    window._ojs.paths.docToRoot = "";
+    window._ojs.selfContained = false;
+    window._ojs.runtime.interpretFromScriptTags();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    <div class="uthsc-footer-bar">
+      <div class="uthsc-left">
+        <img src="assets/uthsc-logo-horizontal.png" alt="University of Tennessee Health Sciences">
+      </div>
+      <div class="uthsc-right">
+        Department of Preventive Medicine / Biostatistics
+      </div>
+    </div>
+
+    <div class="uthsc-seal-badge">
+      <img src="assets/uthsc-seal.png" alt="UTHSC College of Medicine seal">
+    </div>
+
+    <a class="home-btn" href="#outline" title="Go to Outline" aria-label="Go to Outline">
+      <svg viewbox="0 0 24 24" aria-hidden="true">
+        <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path>
+      </svg>
+    </a>
+    
+
+</body></html>
