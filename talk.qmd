@@ -363,7 +363,9 @@ All 8 methods reproduce their reference at every size (worst 1.1e-13; sparse met
 
 <div class="thankyou-content">
 
-Thank you for your attention!
+If u have any questions, please reach out at abaner12@uthsc.edu
+
+Abhisek Banerjee, Prof. Dr. Gregory Farage, Prof. Dr. Saunak Sen 
 
 </div>
 
