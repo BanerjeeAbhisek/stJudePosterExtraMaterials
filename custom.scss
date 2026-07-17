@@ -129,23 +129,6 @@
 }
 
 /* =========================================================
-   SEAL BADGE — bottom-right of EVERY slide (College of Medicine)
-   ========================================================= */
-.uthsc-seal-badge{
-  position: fixed;
-  right: 22px;
-  bottom: 6px;                   /* dips slightly toward the corner */
-  z-index: 10001;
-  pointer-events: none;
-}
-.uthsc-seal-badge img{
-  width: 118px;
-  height: 118px;
-  display: block;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,.20));
-}
-
-/* =========================================================
    TITLE SLIDE (custom, built like the Thank-You slide)
    Markup: .titlepage-slide  >  .titlepage-content (white card)
            > img.tp-logo + p.tp-title + p.tp-author + p.tp-institute

@@ -74,7 +74,7 @@ resources:
 <p class="tp-title">
   Julia Package for Large Matrix Decomposition in Metabolomics: BigRiverEssence.jl
 </p>
-<p class="tp-author">Abhisek Banerjee, Gregory farage, Saunak Sen</p>
+<p class="tp-author">Abhisek Banerjee, Gregory Farage, Saunak Sen</p>
 <p class="tp-institute">UT Health Science Center — Preventive Medicine / Biostatistics</p>
 
 
@@ -360,9 +360,9 @@ All 8 methods reproduce their reference at every size (worst 1.1e-13; sparse met
 
 <div class="thankyou-content">
 
-If u have any questions, please reach out at abaner12@uthsc.edu
+If you have any questions, please reach out at abaner12@uthsc.edu
 
-Abhisek Banerjee, Prof. Dr. Gregory Farage, Prof. Dr. Saunak Sen 
+Abhisek Banerjee, Gregory Farage, Saunak Sen 
 
 </div>
 
